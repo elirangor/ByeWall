@@ -27,7 +27,6 @@
 
 ## Future Feature:
 - RTL support
-- CAPTCHA
 - Auto-Click the “X” Close Button in archive.today
 
 
