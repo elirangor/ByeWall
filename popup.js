@@ -8,15 +8,7 @@ function getCurrentTabInfo(callback) {
 function getLocalTimestamp() {
   const now = new Date();
   const pad = (n) => n.toString().padStart(2, '0');
-
-  const year = now.getFullYear();
-  const month = pad(now.getMonth() + 1);
-  const day = pad(now.getDate());
-
-  const hours = pad(now.getHours());
-  const minutes = pad(now.getMinutes());
-
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
 }
 
 function saveArchivedEntry(entry) {
@@ -53,12 +45,17 @@ function loadArchivedUrls() {
       link.rel = "noopener noreferrer";
       link.className = "history-link";
 
-      const archivesUsed = Array.isArray(entry.used) ? entry.used.join(", ") : "Unknown archive";
-      const time = typeof entry.time === 'string' ? entry.time : "Unknown time";
-
       const meta = document.createElement('div');
       meta.className = 'history-meta';
-      meta.textContent = `(${archivesUsed} | ${time})`;
+
+      let archiveLinks = 'Unknown archive';
+      if (Array.isArray(entry.used)) {
+        archiveLinks = entry.used
+          .map(a => `<a href="${a.url}" target="_blank" class="history-link">${a.service}</a>`)
+          .join(" | ");
+      }
+
+      meta.innerHTML = `(${archiveLinks} | ${entry.time || 'Unknown time'})`;
 
       container.appendChild(link);
       container.appendChild(meta);
@@ -76,10 +73,12 @@ function checkWaybackAvailability(url, callback) {
         callback(snapshot.url);
       } else {
         alert("No archived version found in Wayback Machine.");
+        callback(null);
       }
     })
     .catch(err => {
       console.error("Wayback lookup failed:", err);
+      callback(null);
     });
 }
 
@@ -94,28 +93,38 @@ document.getElementById("archive").addEventListener("click", function () {
 
   getCurrentTabInfo(function (tabInfo) {
     const { url, title } = tabInfo;
-    const archivesUsed = [];
     const time = getLocalTimestamp();
+    const archiveLinks = [];
 
-    if (useWayback) {
-      checkWaybackAvailability(url, (waybackUrl) => {
-        chrome.tabs.create({ url: waybackUrl });
-      });
-      archivesUsed.push("Wayback");
-    }
+    let pending = 0;
+    let hasSaved = false;
+
+    const trySave = () => {
+      if (pending === 0 && !hasSaved) {
+        hasSaved = true;
+        saveArchivedEntry({ url, title, used: archiveLinks, time });
+      }
+    };
 
     if (useArchiveToday) {
       const archiveTodayUrl = "https://archive.today/?run=1&url=" + encodeURIComponent(url);
       chrome.tabs.create({ url: archiveTodayUrl });
-      archivesUsed.push("Archive.today");
+      archiveLinks.push({ service: "Archive.today", url: archiveTodayUrl });
     }
 
-    saveArchivedEntry({
-      url: url,
-      title: title,
-      used: archivesUsed,
-      time: time
-    });
+    if (useWayback) {
+      pending++;
+      checkWaybackAvailability(url, (waybackUrl) => {
+        if (waybackUrl) {
+          chrome.tabs.create({ url: waybackUrl });
+          archiveLinks.push({ service: "Wayback Machine", url: waybackUrl });
+        }
+        pending--;
+        trySave();
+      });
+    }
+
+    trySave(); // In case only archive.today is selected
   });
 });
 
