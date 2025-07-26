@@ -1,111 +1,127 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Archive Article</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f4f4f4;
-        padding: 15px;
-        width: 320px;
-      }
 
-      h3 {
-        margin-top: 0;
-        color: #333;
-        font-size: 16px;
-      }
+<head>
+  <title>Archive Article</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #f4f4f4;
+      padding: 15px;
+      width: 320px;
+    }
 
-      label {
-        display: block;
-        margin-bottom: 8px;
-      }
+    h3 {
+      margin-top: 0;
+      color: #333;
+      font-size: 16px;
+    }
 
-      input[type="checkbox"] {
-        margin-right: 8px;
-      }
+    label {
+      display: block;
+      margin-bottom: 8px;
+    }
 
-      button {
-        width: 100%;
-        background-color: #007bff;
-        color: white;
-        padding: 10px;
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
+    input[type="checkbox"] {
+      margin-right: 8px;
+    }
 
-      button:hover {
-        background-color: #0056b3;
-      }
+    button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
 
-      .history {
-        margin-top: 20px;
-      }
+    button:hover {
+      background-color: #0056b3;
+    }
 
-      h4 {
-        font-size: 14px;
-        margin-bottom: 8px;
-        color: #222;
-      }
+    .history {
+      margin-top: 20px;
+    }
 
-      .history-item {
-        font-size: 13px;
-        color: #333;
-        margin-bottom: 14px;
-        line-height: 1.4em;
-      }
+    h4 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #222;
+    }
 
-      .history-link {
-        font-weight: bold;
-        color: #007bff;
-        text-decoration: none;
-      }
+    .history-item {
+      font-size: 13px;
+      color: #333;
+      margin-bottom: 14px;
+      line-height: 1.4em;
+      direction: ltr;
+      text-align: left;
+    }
 
-      .history-link:hover {
-        text-decoration: underline;
-      }
+    .history-link {
+      font-weight: bold;
+      color: #007bff;
+      text-decoration: none;
+    }
 
-      .history-meta {
-        font-size: 12px;
-        color: #666;
-        margin-top: 2px;
-      }
+    .history-link:hover {
+      text-decoration: underline;
+    }
 
-      .rtl {
-        direction: rtl;
-        text-align: right;
-      }
+    .history-meta {
+      font-size: 12px;
+      color: #666;
+      margin-top: 2px;
+    }
 
-      .history-item {
-        font-size: 13px;
-        color: #333;
-        margin-bottom: 14px;
-        line-height: 1.4em;
-        direction: ltr; /* default direction */
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
-    <h3>View archived page</h3>
-    
-    <label><input type="checkbox" id="archiveToday" checked /> Archive.Today</label>
-    <label><input type="checkbox" id="wayback" /> Wayback Machine</label>
+    .rtl {
+      direction: rtl;
+      text-align: right;
+    }
 
-    <button id="archive">Archive Selected</button>
+    .credit {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #666;
+      text-align: center;
+    }
 
-    <div class="history">
-      <h4>Recently Archived</h4>
-      <div id="historyList"></div>
-    </div>
+    .credit a {
+      color: #007bff;
+      text-decoration: none;
+    }
 
-    <script src="popup.js"></script>
-  </body>
+    .credit a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+  <h3>View archived page</h3>
+
+  <label><input type="checkbox" id="archiveToday" checked /> Archive.Today</label>
+  <label><input type="checkbox" id="wayback" /> Wayback Machine</label>
+
+  <button id="archive">Archive Selected</button>
+
+  <div class="history">
+    <h4>Recently Archived</h4>
+    <div id="historyList"></div>
+  </div>
+
+  <div class="credit">
+    Just a little something from
+    <a href="https://www.linkedin.com/in/elirang/" target="_blank">Eliran</a> |
+    <a href="https://github.com/elirangor/ByeWall" target="_blank">View on GitHub</a>
+  </div>
+
+
+  <script src="popup.js"></script>
+</body>
+
 </html>
