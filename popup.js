@@ -14,9 +14,15 @@ function getLocalTimestamp() {
 function saveArchivedEntry(entry) {
   chrome.storage.local.get(['archivedUrls'], function (result) {
     let entries = Array.isArray(result.archivedUrls) ? result.archivedUrls : [];
+    console.log("[saveArchivedEntry] Current stored entries:", entries);
+
     entries.unshift(entry);
     entries = entries.slice(0, 5);
-    chrome.storage.local.set({ archivedUrls: entries });
+
+    console.log("[saveArchivedEntry] New entries to save:", entries);
+    chrome.storage.local.set({ archivedUrls: entries }, () => {
+      console.log("[saveArchivedEntry] Entries successfully saved.");
+    });
   });
 }
 
@@ -27,9 +33,17 @@ function decodeHTMLEntities(text) {
 }
 
 function loadArchivedUrls() {
+  console.log("[loadArchivedUrls] Attempting to load stored archive history...");
   chrome.storage.local.get(['archivedUrls'], function (result) {
     const entries = Array.isArray(result.archivedUrls) ? result.archivedUrls : [];
+    console.log("[loadArchivedUrls] Loaded entries:", entries);
+
     const list = document.getElementById('historyList');
+    if (!list) {
+      console.warn("[loadArchivedUrls] Could not find #historyList element.");
+      return;
+    }
+
     list.innerHTML = '';
 
     entries.forEach((entry) => {
@@ -82,50 +96,54 @@ function checkWaybackAvailability(url, callback) {
     });
 }
 
-document.getElementById("archive").addEventListener("click", function () {
-  const useWayback = document.getElementById("wayback").checked;
-  const useArchiveToday = document.getElementById("archiveToday").checked;
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("[popup.js] DOM fully loaded. Initializing extension...");
+  loadArchivedUrls();
 
-  if (!useWayback && !useArchiveToday) {
-    alert("Please select at least one archive service.");
-    return;
-  }
+  document.getElementById("archive").addEventListener("click", function () {
+    const useWayback = document.getElementById("wayback").checked;
+    const useArchiveToday = document.getElementById("archiveToday").checked;
 
-  getCurrentTabInfo(function (tabInfo) {
-    const { url, title } = tabInfo;
-    const time = getLocalTimestamp();
-    const archiveLinks = [];
-
-    let pending = 0;
-    let hasSaved = false;
-
-    const trySave = () => {
-      if (pending === 0 && !hasSaved) {
-        hasSaved = true;
-        saveArchivedEntry({ url, title, used: archiveLinks, time });
-      }
-    };
-
-    if (useArchiveToday) {
-      const archiveTodayUrl = "https://archive.today/?run=1&url=" + encodeURIComponent(url);
-      chrome.tabs.create({ url: archiveTodayUrl });
-      archiveLinks.push({ service: "Archive.today", url: archiveTodayUrl });
+    if (!useWayback && !useArchiveToday) {
+      alert("Please select at least one archive service.");
+      return;
     }
 
-    if (useWayback) {
-      pending++;
-      checkWaybackAvailability(url, (waybackUrl) => {
-        if (waybackUrl) {
-          chrome.tabs.create({ url: waybackUrl });
-          archiveLinks.push({ service: "Wayback Machine", url: waybackUrl });
+    getCurrentTabInfo(function (tabInfo) {
+      const { url, title } = tabInfo;
+      const time = getLocalTimestamp();
+      const archiveLinks = [];
+
+      let pending = 0;
+      let hasSaved = false;
+
+      const trySave = () => {
+        if (pending === 0 && !hasSaved) {
+          hasSaved = true;
+          console.log("[archive] Saving archive entry...");
+          saveArchivedEntry({ url, title, used: archiveLinks, time });
         }
-        pending--;
-        trySave();
-      });
-    }
+      };
 
-    trySave(); // In case only archive.today is selected
+      if (useArchiveToday) {
+        const archiveTodayUrl = "https://archive.today/?run=1&url=" + encodeURIComponent(url);
+        chrome.tabs.create({ url: archiveTodayUrl });
+        archiveLinks.push({ service: "Archive.today", url: archiveTodayUrl });
+      }
+
+      if (useWayback) {
+        pending++;
+        checkWaybackAvailability(url, (waybackUrl) => {
+          if (waybackUrl) {
+            chrome.tabs.create({ url: waybackUrl });
+            archiveLinks.push({ service: "Wayback Machine", url: waybackUrl });
+          }
+          pending--;
+          trySave();
+        });
+      }
+
+      trySave(); // In case only archive.today is selected
+    });
   });
 });
-
-loadArchivedUrls();
