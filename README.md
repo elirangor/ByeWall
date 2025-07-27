@@ -26,7 +26,7 @@
 ---
 
 ## Future Feature:
-- RTL support
+- Recently viewed articles on MacOS
 - Auto-Click the “X” Close Button in archive.today
 
 
