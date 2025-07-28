@@ -3,115 +3,403 @@
 <head>
   <meta charset="UTF-8" />
   <title>Archive Article</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <style>
     body {
       font-family: "Inter", sans-serif;
-      background-color: #f4f4f4;
-      padding: 15px;
+      background-color: #f8f9fa;
+      padding: 12px;
       width: 320px;
+      margin: 0;
+      box-sizing: border-box;
+      max-height: 500px;
+      overflow: hidden;
     }
 
     h3 {
-      margin-top: 0;
-      color: #333;
+      margin: 0 0 12px 0;
+      color: #212529;
       font-size: 16px;
+      font-weight: 600;
+    }
+
+    .options-section { /* Removed manual-add-section from here */
+      background: white;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e9ecef;
     }
 
     label {
-      display: block;
+      display: flex;
+      align-items: center;
       margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #495057;
     }
 
-    input[type="checkbox"] {
-      margin-right: 8px;
+    label:last-child {
+      margin-bottom: 0;
     }
+
+    input[type="radio"] {
+      margin-right: 10px;
+      width: 16px;
+      height: 16px;
+      accent-color: #007bff;
+    }
+
+    /* Removed style for input[type="text"] */
 
     button {
       width: 100%;
-      background-color: #007bff;
+      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
       color: white;
-      padding: 10px;
+      padding: 10px 14px;
       border: none;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
-      margin-top: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
     }
 
-    button:hover {
-      background-color: #0056b3;
+    button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
 
     .history {
-      margin-top: 20px;
+      background: white;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 12px;
+      border: 1px solid #e9ecef;
+      max-height: 200px;
+      overflow-y: auto;
     }
 
     h4 {
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: #222;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0 0 10px 0;
+      color: #212529;
     }
 
     .history-item {
-      font-size: 13px;
-      color: #333;
-      margin-bottom: 14px;
-      line-height: 1.4em;
-      direction: auto;
-      unicode-bidi: plaintext;
+      font-size: 12px;
+      color: #495057;
+      margin-bottom: 10px;
+      line-height: 1.3em;
+      padding: 10px;
+      border-radius: 4px;
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      transition: all 0.2s ease;
+    }
+
+    .history-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .history-item:hover {
+      background: #e9ecef;
+      border-color: #dee2e6;
     }
 
     .history-link {
-      font-weight: bold;
+      font-weight: 500;
       color: #007bff;
       text-decoration: none;
+      display: block;
+      margin-bottom: 4px;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      transition: color 0.2s ease;
     }
 
     .history-link:hover {
       text-decoration: underline;
+      color: #0056b3;
     }
 
     .history-meta {
-      font-size: 12px;
-      color: #666;
-      margin-top: 2px;
+      font-size: 10px;
+      color: #6c757d;
+      margin-top: 4px;
+      font-weight: 400;
+      text-align: left;
+    }
+
+    /* Style for clickable service names in history */
+    .history-meta .service-link {
+      color: #007bff; /* Match history-link color */
+      text-decoration: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .history-meta .service-link:hover {
+      text-decoration: underline;
+      color: #0056b3;
+    }
+
+    /* RTL support */
+    .history-item[dir="rtl"] .history-meta {
+      text-align: right;
+    }
+
+    .history-meta a {
+      color: #6c757d; /* Default for other links in meta */
+      text-decoration: none;
+      font-weight: 400;
+    }
+
+    .history-meta a:hover {
+      text-decoration: underline;
     }
 
     .credit {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #666;
+      margin-top: 12px;
+      font-size: 10px;
+      color: #6c757d;
       text-align: center;
+      padding-top: 10px;
+      border-top: 1px solid #e9ecef;
     }
 
     .credit a {
       color: #007bff;
       text-decoration: none;
+      font-weight: 500;
     }
 
     .credit a:hover {
       text-decoration: underline;
     }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #6c757d;
+      font-style: italic;
+    }
+
+    /* Responsive adjustments for different screen densities */
+    @media (-webkit-min-device-pixel-ratio: 2) {
+      body {
+        font-size: 13px;
+      }
+      
+      .history-item {
+        font-size: 12px;
+      }
+      
+      .history-meta {
+        font-size: 10px;
+      }
+    }
+
+    /* Dark mode support - improved colors */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #0f0f0f;
+        color: #f0f0f0;
+      }
+
+      .options-section,
+      .history { /* Removed manual-add-section from here */
+        background: #1c1c1c;
+        border-color: #333;
+      }
+
+      h3, h4 {
+        color: #f0f0f0;
+      }
+
+      label {
+        color: #e0e0e0;
+      }
+
+      input[type="radio"] {
+        accent-color: #4a9eff;
+      }
+
+      /* Removed dark mode style for input[type="text"] */
+
+      button {
+        background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+        box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
+      }
+
+      button:hover:not(:disabled) {
+        background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+        box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4);
+      }
+
+      .history-item {
+        background: #242424;
+        border-color: #404040;
+        color: #e0e0e0;
+      }
+
+      .history-item:hover {
+        background: #2a2a2a;
+        border-color: #4a4a4a;
+      }
+
+      .history-link {
+        color: #6db3ff;
+      }
+
+      .history-link:hover {
+        color: #4a9eff;
+      }
+
+      .history-meta {
+        color: #a0a0a0;
+      }
+
+      /* Dark mode for clickable service names in history */
+      .history-meta .service-link {
+        color: #6db3ff;
+      }
+
+      .history-meta .service-link:hover {
+        color: #4a9eff;
+      }
+
+      .credit {
+        color: #888;
+        border-color: #333;
+      }
+
+      .credit a {
+        color: #6db3ff;
+      }
+
+      .credit a:hover {
+        color: #4a9eff;
+      }
+    }
+
+    /* Custom Message Box Styles */
+    .message-box {
+      display: none; /* Hidden by default */
+      position: fixed; /* Stay in place */
+      z-index: 1000; /* Sit on top */
+      left: 0;
+      top: 0;
+      width: 100%; /* Full width */
+      height: 100%; /* Full height */
+      overflow: auto; /* Enable scroll if needed */
+      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      align-items: center; /* Center vertically */
+      justify-content: center; /* Center horizontally */
+    }
+
+    .message-box-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%; /* Responsive width */
+      max-width: 300px; /* Max width for larger screens */
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .message-box-content p {
+      margin-bottom: 15px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .message-box-content button {
+      background: #007bff;
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .message-box-content button:hover {
+      background: #0056b3;
+    }
+
+    /* Dark mode for message box */
+    @media (prefers-color-scheme: dark) {
+      .message-box-content {
+        background-color: #242424;
+        border-color: #404040;
+      }
+      .message-box-content p {
+        color: #e0e0e0;
+      }
+      .message-box-content button {
+        background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+      }
+      .message-box-content button:hover {
+        background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+      }
+    }
   </style>
 </head>
 <body>
-  <h3>View archived page</h3>
+  <h3>📚 ByeWall </h3>
 
-  <label><input type="checkbox" id="archiveToday" checked /> Archive.Today</label>
-  <label><input type="checkbox" id="wayback" /> Wayback Machine</label>
+  <div class="options-section">
+    <label>
+      <input type="radio" id="archiveTodayRadio" name="archiveService" value="archiveToday" checked />
+      Archive.Today
+    </label>
+    <label>
+      <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
+      Wayback Machine
+    </label>
+  </div>
 
-  <button id="archive">Archive Selected</button>
+  <button id="archive">Read Behind the Wall</button>
+
+  <!-- Removed the manual-add-section -->
 
   <div class="history">
-    <h4>Recently Viewed</h4>
-    <div id="historyList"></div>
+    <h4>📖 Recently Viewed</h4>
+    <div id="historyList">
+      <div class="loading">Loading history...</div>
+    </div>
   </div>
 
   <div class="credit">
     Just a little something from
     <a href="https://www.linkedin.com/in/elirang/" target="_blank">Eliran</a> |
     <a href="https://github.com/elirangor/ByeWall" target="_blank">View on GitHub</a>
+  </div>
+
+  <!-- Custom Message Box HTML -->
+  <div id="messageBox" class="message-box">
+    <div class="message-box-content">
+      <p id="messageText"></p>
+      <button id="messageBoxClose">OK</button>
+    </div>
   </div>
 
   <script src="popup.js"></script>
