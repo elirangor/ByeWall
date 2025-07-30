@@ -1,4 +1,4 @@
-# Archive Blocked Articles — Chrome Extension
+# Archive Blocked Articles - Chrome Extension
 
 📦 A browser extension to instantly access archived versions of the current page using:
 - [Archive.today](https://archive.today)
