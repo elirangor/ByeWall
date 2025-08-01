@@ -7,8 +7,9 @@
 ## ✅ Features
 
 - One-click archive to selected services
-- Remembers last 5 archived pages
+- Remembers your preferred archive service
 - Modern, minimal design
+- Cross-platform compatibility
 
 ## 🔧 How to Install
 
@@ -22,13 +23,13 @@
 
 - `popup.js` handles UI logic
 - No external dependencies
+- Simplified design for better reliability
 
 ---
 
-## Future Feature:
-- Recently viewed articles on MacOS
-- Auto-Click the “X” Close Button in archive.today
-
+## Future Features:
+- Recently viewed archived articles history
+- Auto-Click the "X" Close Button in archive.today
 
 ## 📄 License
 

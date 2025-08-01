@@ -9,26 +9,37 @@
       font-family: "Inter", sans-serif;
       background-color: #f8f9fa;
       padding: 12px;
-      width: 320px;
+      width: 280px; /* Made the popup thinner */
       margin: 0;
       box-sizing: border-box;
       max-height: 500px;
       overflow: hidden;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    /* Header Container to hold title and toggle */
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
     h3 {
-      margin: 0 0 12px 0;
+      margin: 0;
       color: #212529;
-      font-size: 16px;
+      font-size: 20px; /* Made the title bigger */
       font-weight: 600;
+      transition: color 0.3s;
     }
 
-    .options-section { /* Removed manual-add-section from here */
+    .options-section {
       background: white;
       border-radius: 6px;
       padding: 12px;
       margin-bottom: 12px;
       border: 1px solid #e9ecef;
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     label {
@@ -38,6 +49,7 @@
       cursor: pointer;
       font-size: 13px;
       color: #495057;
+      transition: color 0.3s;
     }
 
     label:last-child {
@@ -50,8 +62,6 @@
       height: 16px;
       accent-color: #007bff;
     }
-
-    /* Removed style for input[type="text"] */
 
     button {
       width: 100%;
@@ -80,98 +90,6 @@
       box-shadow: none;
     }
 
-    .history {
-      background: white;
-      border-radius: 6px;
-      padding: 12px;
-      margin-top: 12px;
-      border: 1px solid #e9ecef;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    h4 {
-      font-size: 13px;
-      font-weight: 600;
-      margin: 0 0 10px 0;
-      color: #212529;
-    }
-
-    .history-item {
-      font-size: 12px;
-      color: #495057;
-      margin-bottom: 10px;
-      line-height: 1.3em;
-      padding: 10px;
-      border-radius: 4px;
-      background: #f8f9fa;
-      border: 1px solid #e9ecef;
-      transition: all 0.2s ease;
-    }
-
-    .history-item:last-child {
-      margin-bottom: 0;
-    }
-
-    .history-item:hover {
-      background: #e9ecef;
-      border-color: #dee2e6;
-    }
-
-    .history-link {
-      font-weight: 500;
-      color: #007bff;
-      text-decoration: none;
-      display: block;
-      margin-bottom: 4px;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      hyphens: auto;
-      transition: color 0.2s ease;
-    }
-
-    .history-link:hover {
-      text-decoration: underline;
-      color: #0056b3;
-    }
-
-    .history-meta {
-      font-size: 10px;
-      color: #6c757d;
-      margin-top: 4px;
-      font-weight: 400;
-      text-align: left;
-    }
-
-    /* Style for clickable service names in history */
-    .history-meta .service-link {
-      color: #007bff; /* Match history-link color */
-      text-decoration: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: color 0.2s ease;
-    }
-
-    .history-meta .service-link:hover {
-      text-decoration: underline;
-      color: #0056b3;
-    }
-
-    /* RTL support */
-    .history-item[dir="rtl"] .history-meta {
-      text-align: right;
-    }
-
-    .history-meta a {
-      color: #6c757d; /* Default for other links in meta */
-      text-decoration: none;
-      font-weight: 400;
-    }
-
-    .history-meta a:hover {
-      text-decoration: underline;
-    }
-
     .credit {
       margin-top: 12px;
       font-size: 10px;
@@ -179,6 +97,7 @@
       text-align: center;
       padding-top: 10px;
       border-top: 1px solid #e9ecef;
+      transition: color 0.3s, border-color 0.3s;
     }
 
     .credit a {
@@ -191,126 +110,19 @@
       text-decoration: underline;
     }
 
-    .loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      color: #6c757d;
-      font-style: italic;
-    }
-
-    /* Responsive adjustments for different screen densities */
-    @media (-webkit-min-device-pixel-ratio: 2) {
-      body {
-        font-size: 13px;
-      }
-      
-      .history-item {
-        font-size: 12px;
-      }
-      
-      .history-meta {
-        font-size: 10px;
-      }
-    }
-
-    /* Dark mode support - improved colors */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #0f0f0f;
-        color: #f0f0f0;
-      }
-
-      .options-section,
-      .history { /* Removed manual-add-section from here */
-        background: #1c1c1c;
-        border-color: #333;
-      }
-
-      h3, h4 {
-        color: #f0f0f0;
-      }
-
-      label {
-        color: #e0e0e0;
-      }
-
-      input[type="radio"] {
-        accent-color: #4a9eff;
-      }
-
-      /* Removed dark mode style for input[type="text"] */
-
-      button {
-        background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-        box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
-      }
-
-      button:hover:not(:disabled) {
-        background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-        box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4);
-      }
-
-      .history-item {
-        background: #242424;
-        border-color: #404040;
-        color: #e0e0e0;
-      }
-
-      .history-item:hover {
-        background: #2a2a2a;
-        border-color: #4a4a4a;
-      }
-
-      .history-link {
-        color: #6db3ff;
-      }
-
-      .history-link:hover {
-        color: #4a9eff;
-      }
-
-      .history-meta {
-        color: #a0a0a0;
-      }
-
-      /* Dark mode for clickable service names in history */
-      .history-meta .service-link {
-        color: #6db3ff;
-      }
-
-      .history-meta .service-link:hover {
-        color: #4a9eff;
-      }
-
-      .credit {
-        color: #888;
-        border-color: #333;
-      }
-
-      .credit a {
-        color: #6db3ff;
-      }
-
-      .credit a:hover {
-        color: #4a9eff;
-      }
-    }
-
     /* Custom Message Box Styles */
     .message-box {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1000; /* Sit on top */
+      display: none;
+      position: fixed;
+      z-index: 1000;
       left: 0;
       top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-      align-items: center; /* Center vertically */
-      justify-content: center; /* Center horizontally */
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      align-items: center;
+      justify-content: center;
     }
 
     .message-box-content {
@@ -318,17 +130,19 @@
       margin: auto;
       padding: 20px;
       border: 1px solid #888;
-      width: 80%; /* Responsive width */
-      max-width: 300px; /* Max width for larger screens */
+      width: 80%;
+      max-width: 300px;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       text-align: center;
+      transition: background-color 0.3s, border-color 0.3s;
     }
 
     .message-box-content p {
       margin-bottom: 15px;
       font-size: 14px;
       color: #333;
+      transition: color 0.3s;
     }
 
     .message-box-content button {
@@ -345,26 +159,126 @@
       background: #0056b3;
     }
 
-    /* Dark mode for message box */
-    @media (prefers-color-scheme: dark) {
-      .message-box-content {
-        background-color: #242424;
-        border-color: #404040;
-      }
-      .message-box-content p {
-        color: #e0e0e0;
-      }
-      .message-box-content button {
-        background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-      }
-      .message-box-content button:hover {
-        background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-      }
+    /* Dark Mode styles */
+    .dark-mode {
+      background-color: #26292e;
+      color: #e0e0e0;
+    }
+
+    .dark-mode h3 {
+      color: #f0f0f0;
+    }
+
+    .dark-mode .options-section,
+    .dark-mode .message-box-content {
+      background: #31363d;
+      border-color: #444c56;
+    }
+
+    .dark-mode label {
+      color: #e0e0e0;
+    }
+
+    .dark-mode input[type="radio"] {
+      accent-color: #4a9eff;
+    }
+
+    .dark-mode button {
+      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+      box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
+    }
+
+    .dark-mode button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+      box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4);
+    }
+
+    .dark-mode .message-box-content p {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .message-box-content button {
+      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+    }
+
+    .dark-mode .message-box-content button:hover {
+      background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+    }
+
+    .dark-mode .credit {
+      color: #a0a0a0;
+      border-color: #444c56;
+    }
+
+    .dark-mode .credit a {
+      color: #6db3ff;
+    }
+
+    .dark-mode .credit a:hover {
+      color: #4a9eff;
+    }
+
+    .toggle-container {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
     }
   </style>
 </head>
 <body>
-  <h3> ByeWall 📚</h3>
+  <div class="header-container">
+    <h3> ByeWall 📚</h3>
+    <div class="toggle-container">
+      <label class="toggle-switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
 
   <div class="options-section">
     <label>
@@ -379,22 +293,12 @@
 
   <button id="archive">Read Behind the Wall</button>
 
-  <!-- Removed the manual-add-section -->
-
-  <div class="history">
-    <h4>📖 Recently Viewed</h4>
-    <div id="historyList">
-      <div class="loading">Loading history...</div>
-    </div>
-  </div>
-
   <div class="credit">
     Just a little something from
     <a href="https://www.linkedin.com/in/elirang/" target="_blank">Eliran</a> |
     <a href="https://github.com/elirangor/ByeWall" target="_blank">View on GitHub</a>
   </div>
 
-  <!-- Custom Message Box HTML -->
   <div id="messageBox" class="message-box">
     <div class="message-box-content">
       <p id="messageText"></p>
