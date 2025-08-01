@@ -27,7 +27,7 @@
 
 ---
 
-## Future Features:
+## 🚀 Future Features:
 - Recently viewed archived articles history
 - Auto-Click the "X" Close Button in archive.today
 
