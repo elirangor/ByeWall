@@ -9,11 +9,10 @@
       font-family: "Inter", sans-serif;
       background-color: #f8f9fa;
       padding: 12px;
-      width: 280px; /* Made the popup thinner */
+      width: 350px; /* Made the popup wider */
       margin: 0;
       box-sizing: border-box;
-      max-height: 500px;
-      overflow: hidden;
+      /* Removed max-height and overflow to allow content to be fully visible */
       transition: background-color 0.3s, color 0.3s;
     }
 
@@ -30,6 +29,14 @@
       color: #212529;
       font-size: 20px; /* Made the title bigger */
       font-weight: 600;
+      transition: color 0.3s;
+    }
+    
+    /* New: Styling for the history list heading */
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #495057;
       transition: color 0.3s;
     }
 
@@ -164,8 +171,9 @@
       background-color: #26292e;
       color: #e0e0e0;
     }
-
-    .dark-mode h3 {
+    
+    .dark-mode h3,
+    .dark-mode h4 { /* New: Apply dark mode to history heading */
       color: #f0f0f0;
     }
 
@@ -267,6 +275,67 @@
     input:checked + .slider:before {
       transform: translateX(20px);
     }
+    
+    /* New: History Section Styling */
+    .history-item {
+      background: #fff;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 8px;
+      margin-bottom: 5px;
+      display: block;
+      font-size: 12px;
+      color: #333;
+      text-decoration: none;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    
+    .history-item-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .history-item-content .title {
+      font-weight: 600;
+      white-space: normal;
+      word-wrap: break-word;
+      font-size: 13px; /* Slightly increased font size */
+    }
+
+    .history-item-content .details {
+      font-size: 10px;
+      color: #6c757d;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    /* New: RTL support for history items */
+    .history-item.rtl {
+        direction: rtl;
+        text-align: right;
+    }
+    .history-item.rtl .history-item-content .details {
+        flex-direction: row-reverse;
+    }
+
+    .history-item:hover {
+      background-color: #f1f3f5;
+    }
+    
+    .dark-mode .history-item {
+      background: #31363d;
+      border-color: #444c56;
+      color: #e0e0e0;
+    }
+    
+    .dark-mode .history-item:hover {
+      background-color: #3e444b;
+    }
+    
+    .dark-mode .history-item-content .details {
+        color: #a0a0a0;
+    }
   </style>
 </head>
 <body>
@@ -289,6 +358,14 @@
       <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
       Wayback Machine
     </label>
+  </div>
+  
+  <!-- Section for displaying recently archived articles -->
+  <div id="history-section" style="margin-top: 12px; display: none;">
+    <h4>Recently Archived</h4>
+    <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;">
+      <!-- History items will be inserted here by popup.js -->
+    </ul>
   </div>
 
   <button id="archive">Read Behind the Wall</button>
