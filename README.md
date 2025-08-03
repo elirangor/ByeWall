@@ -6,30 +6,25 @@
 
 ## ✅ Features
 
-- One-click archive to selected services
-- Remembers your preferred archive service
-- Modern, minimal design
-- Cross-platform compatibility
+- One-click archive to selected services  
+- Remembers your preferred archive service  
+- Modern, minimal design  
+- Cross-platform compatibility  
 
 ## 🔧 How to Install
 
-1. Download this repo
-2. Open Chrome and go to `chrome://extensions/`
-3. Enable **Developer mode**
-4. Click **Load unpacked**
-5. Select this folder
+1. Download this repo  
+2. Open Chrome and go to `chrome://extensions/`  
+3. Enable **Developer mode**  
+4. Click **Load unpacked**  
+5. Select this folder  
 
 ## 🛠 Development Notes
 
-- `popup.js` handles UI logic
-- No external dependencies
-- Simplified design for better reliability
-
----
-
-## 🚀 Future Features:
-- Recently viewed archived articles history
-- Auto-Click the "X" Close Button in archive.today
+- `popup.js` handles UI logic  
+- No external dependencies  
+- Simplified design for better reliability  
+- Special thanks to [@8288tom](https://github.com/8288tom) for improving the history functionality.
 
 ## 📄 License
 
