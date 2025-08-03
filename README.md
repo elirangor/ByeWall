@@ -11,6 +11,10 @@
 - Modern, minimal design  
 - Cross-platform compatibility  
 
+![Screenshot of ByeWall popup](screenshot.png)
+
+
+
 ## 🔧 How to Install
 
 1. Download this repo  

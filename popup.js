@@ -1,15 +1,16 @@
-/* popup.js  – ByeWall v1.5  ____________________________________________ */
-/* eslint-env browser, webextensions */
+/* popup.js – ByeWall v1.5 */
 
 ////////////////////////////////////////////////////////////////////////////////
-// 1.  SMALL UTILS                                                            //
+// 1. SMALL UTILS                                                             //
 ////////////////////////////////////////////////////////////////////////////////
+
 function showMessageBox(message) {
   const msgBox = document.getElementById('messageBox');
   const msgText = document.getElementById('messageText');
   msgText.textContent = message;
   msgBox.style.display = 'flex';
 }
+
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('messageBoxClose');
   if (btn) btn.addEventListener('click', () =>
@@ -28,18 +29,18 @@ const debounce = (fn, wait) => {
 
 const isRTL = str => /[\u0590-\u05FF\u0600-\u06FF]/.test(str);
 
-/* promisified storage helpers */
 const getStorage = key => new Promise(r => chrome.storage.local.get(key, r));
 const setStorage = (key, val) => new Promise(r => chrome.storage.local.set({ [key]: val }, r));
 
 ////////////////////////////////////////////////////////////////////////////////
-// 2.  HISTORY (last 5 archives)                                              //
+// 2. HISTORY (last 5 archives)                                               //
 ////////////////////////////////////////////////////////////////////////////////
+
 async function saveToHistory(title, url, service, archiveUrl) {
   const { archiveHistory = [] } = await getStorage('archiveHistory');
   archiveHistory.unshift({ title, url, service, archiveUrl, timestamp: Date.now() });
   await setStorage('archiveHistory', archiveHistory.slice(0, 5));
-  loadHistory();                       // refresh list in popup
+  loadHistory();
 }
 
 async function loadHistory() {
@@ -53,56 +54,79 @@ async function loadHistory() {
   archiveHistory.forEach(item => {
     const li = document.createElement('li');
     const link = document.createElement('a');
-    link.href = item.archiveUrl; link.target = '_blank'; link.className = 'history-item';
-    if (isRTL(item.title)) { link.classList.add('rtl'); link.dir = 'rtl'; }
+    link.href = item.archiveUrl;
+    link.target = '_blank';
+    link.className = 'history-item';
 
-    link.innerHTML =
-      `<div class="history-item-content">
-         <span class="title">${item.title}</span>
-         <div class="details">
-           <span>${item.service}</span>
-           <span>${new Date(item.timestamp)
-        .toLocaleString(undefined,
-          { dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23' })}</span>
-         </div>
-       </div>`;
-    li.appendChild(link); list.appendChild(li);
+    const isRightToLeft = isRTL(item.title);
+    if (isRightToLeft) {
+      link.classList.add('rtl');
+      link.dir = 'rtl';
+    }
+
+    const dt = new Date(item.timestamp);
+    const pad = n => n.toString().padStart(2, '0');
+    const hours = pad(dt.getHours());
+    const minutes = pad(dt.getMinutes());
+
+    let formattedDate;
+    if (isRightToLeft) {
+      // RTL: date first, then time
+      formattedDate = `${dt.getDate()}/${dt.getMonth() + 1}/${dt.getFullYear().toString().slice(2)}, ${hours}:${minutes}`;
+    } else {
+      // LTR: time first, then date
+      formattedDate = `${hours}:${minutes}, ${dt.getDate()}/${dt.getMonth() + 1}/${dt.getFullYear().toString().slice(2)}`;
+    }
+
+    link.innerHTML = `
+      <div class="history-item-content">
+        <span class="title">${item.title}</span>
+        <div class="details">
+          <span>${item.service}</span>
+          <span>${formattedDate}</span>
+        </div>
+      </div>`;
+
+    li.appendChild(link);
+    list.appendChild(li);
   });
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 3.  MAIN – runs once popup DOM is ready                                    //
+// 3. MAIN – runs once popup DOM is ready                                     //
 ////////////////////////////////////////////////////////////////////////////////
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[popup] loaded');
 
-  loadHistory();                                   // build history list on open
+  loadHistory();
 
-  /* restore previously-chosen archive service */
+  // Restore previously chosen archive service
   getStorage('selectedArchiveServicePref').then(({ selectedArchiveServicePref = 'archiveToday' }) => {
     const radio = document.getElementById(selectedArchiveServicePref + 'Radio');
     if (radio) radio.checked = true;
   });
 
-  /* remember service preference */
+  // Remember service preference
   document.querySelectorAll('input[name="archiveService"]').forEach(radio =>
     radio.addEventListener('change', () =>
       setStorage('selectedArchiveServicePref', radio.value)));
 
-  /* dark-mode toggle --------------------------------------------------- */
+  // Dark mode toggle
   (async () => {
     const { darkModeEnabled } = await getStorage('darkModeEnabled');
     const toggle = document.getElementById('darkModeToggle');
-    if (darkModeEnabled) { document.body.classList.add('dark-mode'); toggle.checked = true; }
+    if (darkModeEnabled) {
+      document.body.classList.add('dark-mode');
+      toggle.checked = true;
+    }
     toggle.addEventListener('change', () => {
       document.body.classList.toggle('dark-mode', toggle.checked);
       setStorage('darkModeEnabled', toggle.checked);
     });
   })();
 
-  /* -------------------------------------------------------------------- */
-  /* ARCHIVE BUTTON (+debounce)                                           */
-  /* -------------------------------------------------------------------- */
+  // Archive button
   const archiveBtn = document.getElementById('archive');
 
   const doArchive = debounce(async () => {
@@ -110,8 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!selRadio) return showMessageBox('Please select an archive service.');
 
     const originalLabel = archiveBtn.textContent;
-    archiveBtn.disabled = true; archiveBtn.textContent = 'Processing…';
-    document.body.classList.add('busy');                // modal overlay
+    archiveBtn.disabled = true;
+    archiveBtn.textContent = 'Processing…';
+    document.body.classList.add('busy');
 
     try {
       const { url, title } = await getCurrentTabInfo();
@@ -119,10 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (selRadio.value === 'archiveToday') {
         archiveUrl = `https://archive.today/?run=1&url=${encodeURIComponent(url)}`;
-
-      } else {                                         // Wayback Machine
+      } else {
         const ctrl = new AbortController();
-        const toId = setTimeout(() => ctrl.abort(), 10_000);
+        const toId = setTimeout(() => ctrl.abort(), 10000);
 
         const r = await fetch(
           `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`,
@@ -137,9 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (archiveUrl) {
         await saveToHistory(
-          title, url,
+          title,
+          url,
           selRadio.value === 'archiveToday' ? 'Archive.today' : 'Wayback Machine',
-          archiveUrl);
+          archiveUrl
+        );
 
         chrome.tabs.create({ url: archiveUrl });
       }
@@ -149,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessageBox('Archiving failed. Please try again.');
     } finally {
       document.body.classList.remove('busy');
-      archiveBtn.disabled = false; archiveBtn.textContent = originalLabel;
+      archiveBtn.disabled = false;
+      archiveBtn.textContent = originalLabel;
     }
   }, 300);
 
@@ -157,12 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////
-// 4.  OVERLAY STYLES (keeps user from closing popup mid-process)            //
+// 4. OVERLAY STYLES (for processing lock)                                    //
 ////////////////////////////////////////////////////////////////////////////////
+
 const style = document.createElement('style');
 style.textContent = `
-  body.busy::before{
-    content:'';position:fixed;inset:0;background:rgba(255,255,255,.6);
-    cursor:progress;z-index:9999;
+  body.busy::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, .6);
+    cursor: progress;
+    z-index: 9999;
   }`;
 document.head.appendChild(style);
