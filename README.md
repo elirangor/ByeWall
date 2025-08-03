@@ -11,7 +11,7 @@
 - Modern, minimal design  
 - Cross-platform compatibility  
 
-## Popup Interface Preview
+## 📸 Popup Interface Preview
 
 
 <img src="screenshot.png" alt="Screenshot of ByeWall popup" width="250">
