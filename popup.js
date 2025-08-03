@@ -1,262 +1,168 @@
-// Function to show custom message box
+/* popup.js  – ByeWall v1.5  ____________________________________________ */
+/* eslint-env browser, webextensions */
+
+////////////////////////////////////////////////////////////////////////////////
+// 1.  SMALL UTILS                                                            //
+////////////////////////////////////////////////////////////////////////////////
 function showMessageBox(message) {
-  const messageBox = document.getElementById('messageBox');
-  const messageText = document.getElementById('messageText');
-  messageText.textContent = message;
-  messageBox.style.display = 'flex'; // Show the modal
+  const msgBox = document.getElementById('messageBox');
+  const msgText = document.getElementById('messageText');
+  msgText.textContent = message;
+  msgBox.style.display = 'flex';
 }
-
-// Event listener for closing the message box
-document.addEventListener('DOMContentLoaded', function() {
-  const messageBoxCloseButton = document.getElementById('messageBoxClose');
-  if (messageBoxCloseButton) {
-    messageBoxCloseButton.addEventListener('click', function() {
-      document.getElementById('messageBox').style.display = 'none'; // Hide the modal
-    });
-  }
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('messageBoxClose');
+  if (btn) btn.addEventListener('click', () =>
+    (document.getElementById('messageBox').style.display = 'none'));
 });
 
-function getCurrentTabInfo(callback) {
-  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    let tab = tabs[0];
-    callback({ url: tab.url, title: tab.title });
+function getCurrentTabInfo() {
+  return new Promise(resolve =>
+    chrome.tabs.query({ active: true, currentWindow: true },
+      tabs => resolve({ url: tabs[0].url, title: tabs[0].title })));
+}
+
+const debounce = (fn, wait) => {
+  let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), wait); };
+};
+
+const isRTL = str => /[\u0590-\u05FF\u0600-\u06FF]/.test(str);
+
+/* promisified storage helpers */
+const getStorage = key => new Promise(r => chrome.storage.local.get(key, r));
+const setStorage = (key, val) => new Promise(r => chrome.storage.local.set({ [key]: val }, r));
+
+////////////////////////////////////////////////////////////////////////////////
+// 2.  HISTORY (last 5 archives)                                              //
+////////////////////////////////////////////////////////////////////////////////
+async function saveToHistory(title, url, service, archiveUrl) {
+  const { archiveHistory = [] } = await getStorage('archiveHistory');
+  archiveHistory.unshift({ title, url, service, archiveUrl, timestamp: Date.now() });
+  await setStorage('archiveHistory', archiveHistory.slice(0, 5));
+  loadHistory();                       // refresh list in popup
+}
+
+async function loadHistory() {
+  const { archiveHistory = [] } = await getStorage('archiveHistory');
+  const list = document.getElementById('historyList');
+  const section = document.getElementById('history-section');
+  list.innerHTML = '';
+  if (!archiveHistory.length) return (section.style.display = 'none');
+
+  section.style.display = 'block';
+  archiveHistory.forEach(item => {
+    const li = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = item.archiveUrl; link.target = '_blank'; link.className = 'history-item';
+    if (isRTL(item.title)) { link.classList.add('rtl'); link.dir = 'rtl'; }
+
+    link.innerHTML =
+      `<div class="history-item-content">
+         <span class="title">${item.title}</span>
+         <div class="details">
+           <span>${item.service}</span>
+           <span>${new Date(item.timestamp)
+        .toLocaleString(undefined,
+          { dateStyle: 'short', timeStyle: 'short', hourCycle: 'h23' })}</span>
+         </div>
+       </div>`;
+    li.appendChild(link); list.appendChild(li);
   });
 }
 
-// Debounce function to prevent rapid consecutive calls
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
+////////////////////////////////////////////////////////////////////////////////
+// 3.  MAIN – runs once popup DOM is ready                                    //
+////////////////////////////////////////////////////////////////////////////////
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('[popup] loaded');
 
-// New: Helper function to detect if a string contains RTL characters
-function isRTL(str) {
-    const rtlChar = /[\u0590-\u05FF\u0600-\u06FF]/; // Hebrew and Arabic unicode ranges
-    return rtlChar.test(str);
-}
+  loadHistory();                                   // build history list on open
 
-// New: Function to save a new archived article to history
-function saveToHistory(tabTitle, tabUrl, archiveService, archiveLink) {
-  chrome.storage.local.get(['archiveHistory'], function(result) {
-    let history = result.archiveHistory || [];
-    // Create new history entry
-    const newEntry = {
-      title: tabTitle,
-      url: tabUrl,
-      service: archiveService,
-      archiveUrl: archiveLink,
-      timestamp: Date.now()
-    };
-    // Add new entry to the front of the array
-    history.unshift(newEntry);
-    // Keep only the last 5 entries
-    history = history.slice(0, 5);
-    // Save updated history
-    chrome.storage.local.set({ archiveHistory: history });
-    // Reload the displayed history
-    loadHistory();
+  /* restore previously-chosen archive service */
+  getStorage('selectedArchiveServicePref').then(({ selectedArchiveServicePref = 'archiveToday' }) => {
+    const radio = document.getElementById(selectedArchiveServicePref + 'Radio');
+    if (radio) radio.checked = true;
   });
-}
 
-// New: Function to load and display history
-function loadHistory() {
-  chrome.storage.local.get(['archiveHistory'], function(result) {
-    const history = result.archiveHistory || [];
-    const historyList = document.getElementById('historyList');
-    const historySection = document.getElementById('history-section');
+  /* remember service preference */
+  document.querySelectorAll('input[name="archiveService"]').forEach(radio =>
+    radio.addEventListener('change', () =>
+      setStorage('selectedArchiveServicePref', radio.value)));
 
-    // Clear existing list items
-    historyList.innerHTML = '';
+  /* dark-mode toggle --------------------------------------------------- */
+  (async () => {
+    const { darkModeEnabled } = await getStorage('darkModeEnabled');
+    const toggle = document.getElementById('darkModeToggle');
+    if (darkModeEnabled) { document.body.classList.add('dark-mode'); toggle.checked = true; }
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark-mode', toggle.checked);
+      setStorage('darkModeEnabled', toggle.checked);
+    });
+  })();
 
-    if (history.length > 0) {
-      historySection.style.display = 'block'; // Show the history section
-      history.forEach(item => {
-        const li = document.createElement('li');
-        const link = document.createElement('a');
-        
-        link.href = item.archiveUrl;
-        link.target = '_blank';
-        link.className = 'history-item';
-        
-        // New: Check for RTL language and apply class and dir attribute
-        if (isRTL(item.title)) {
-            link.classList.add('rtl');
-            link.dir = 'rtl';
-        }
+  /* -------------------------------------------------------------------- */
+  /* ARCHIVE BUTTON (+debounce)                                           */
+  /* -------------------------------------------------------------------- */
+  const archiveBtn = document.getElementById('archive');
 
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'history-item-content';
+  const doArchive = debounce(async () => {
+    const selRadio = document.querySelector('input[name="archiveService"]:checked');
+    if (!selRadio) return showMessageBox('Please select an archive service.');
 
-        const titleSpan = document.createElement('span');
-        titleSpan.className = 'title';
-        titleSpan.textContent = item.title;
-        
-        const detailsDiv = document.createElement('div');
-        detailsDiv.className = 'details';
+    const originalLabel = archiveBtn.textContent;
+    archiveBtn.disabled = true; archiveBtn.textContent = 'Processing…';
+    document.body.classList.add('busy');                // modal overlay
 
-        const serviceSpan = document.createElement('span');
-        serviceSpan.textContent = item.service;
-        
-        const date = new Date(item.timestamp);
-        // New: Use 24-hour format and display the date
-        const formattedDate = date.toLocaleDateString();
-        const formattedTime = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
-        const timestampSpan = document.createElement('span');
-        timestampSpan.textContent = `${formattedDate}, ${formattedTime}`;
+    try {
+      const { url, title } = await getCurrentTabInfo();
+      let archiveUrl = null;
 
-        detailsDiv.appendChild(serviceSpan);
-        detailsDiv.appendChild(timestampSpan);
+      if (selRadio.value === 'archiveToday') {
+        archiveUrl = `https://archive.today/?run=1&url=${encodeURIComponent(url)}`;
 
-        contentDiv.appendChild(titleSpan);
-        contentDiv.appendChild(detailsDiv);
+      } else {                                         // Wayback Machine
+        const ctrl = new AbortController();
+        const toId = setTimeout(() => ctrl.abort(), 10_000);
 
-        link.appendChild(contentDiv);
-        li.appendChild(link);
-        historyList.appendChild(li);
-      });
-    } else {
-      historySection.style.display = 'none'; // Hide the section if no history
-    }
-  });
-}
+        const r = await fetch(
+          `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`,
+          { signal: ctrl.signal, headers: { Accept: 'application/json' } });
 
-document.addEventListener("DOMContentLoaded", function () {
-  console.log("[popup.js] DOM fully loaded. Initializing extension...");
-  
-  // New: Load history when the popup is opened
-  loadHistory();
-
-  // Debounced archive function to prevent multiple rapid clicks
-  const debouncedArchive = debounce(function() {
-    // Get the selected archive service from the radio buttons
-    const selectedServiceRadio = document.querySelector('input[name="archiveService"]:checked');
-    const selectedService = selectedServiceRadio ? selectedServiceRadio.value : null;
-
-    if (!selectedService) {
-      showMessageBox("Please select an archive service.");
-      return;
-    }
-
-    // Disable button during processing
-    const archiveButton = document.getElementById("archive");
-    const originalText = archiveButton.textContent;
-    archiveButton.disabled = true;
-    archiveButton.textContent = "Processing...";
-
-    getCurrentTabInfo(function (tabInfo) {
-      const { url, title } = tabInfo; // Updated to get the title
-      let archiveLinks = [];
-      let pending = 0;
-
-      const tryComplete = () => {
-        if (pending === 0) {
-          // Re-enable button even if no archives were saved or if an error occurred
-          archiveButton.disabled = false;
-          archiveButton.textContent = originalText;
-          // New: After a successful archive, save to history
-          if (archiveLinks.length > 0) {
-             const serviceName = selectedService === 'archiveToday' ? 'Archive.today' : 'Wayback Machine';
-             saveToHistory(title, url, serviceName, archiveLinks[0].url);
-          }
-        }
-      };
-
-      if (selectedService === "archiveToday") {
-        const archiveTodayUrl = "https://archive.today/?run=1&url=" + encodeURIComponent(url);
-        chrome.tabs.create({ url: archiveTodayUrl });
-        archiveLinks.push({ service: "Archive.today", url: archiveTodayUrl });
-        tryComplete();
-      } else if (selectedService === "wayback") {
-        pending++;
-        const timeoutDuration = 10000;
-        const timeoutId = setTimeout(() => {
-          console.warn("Wayback Machine lookup timed out");
-          showMessageBox("Wayback Machine lookup timed out. Please try again.");
-          pending--;
-          tryComplete();
-        }, timeoutDuration);
-
-        fetch("https://archive.org/wayback/available?url=" + encodeURIComponent(url), {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        })
-        .then(response => {
-          clearTimeout(timeoutId);
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const snapshot = data?.archived_snapshots?.closest;
-          if (snapshot && snapshot.available) {
-            const snapshotUrl = snapshot.url;
-            chrome.tabs.create({ url: snapshotUrl });
-            archiveLinks.push({ service: "Wayback Machine", url: snapshotUrl });
-          } else {
-            showMessageBox("No archived version found in Wayback Machine.");
-          }
-          pending--;
-          tryComplete();
-        })
-        .catch(err => {
-          clearTimeout(timeoutId);
-          console.error("Wayback lookup failed:", err);
-          showMessageBox("Failed to check Wayback Machine availability. Please try again.");
-          pending--;
-          tryComplete();
-        });
+        clearTimeout(toId);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const snap = (await r.json()).archived_snapshots?.closest;
+        if (snap?.available) archiveUrl = snap.url;
+        else showMessageBox('No archived version found in Wayback Machine.');
       }
-    });
-  }, 300); // 300ms debounce
 
-  document.getElementById("archive").addEventListener("click", debouncedArchive);
+      if (archiveUrl) {
+        await saveToHistory(
+          title, url,
+          selRadio.value === 'archiveToday' ? 'Archive.today' : 'Wayback Machine',
+          archiveUrl);
 
-  // Load saved preference for the selected archive service
-  chrome.storage.local.get(['selectedArchiveServicePref'], function(result) {
-    const selectedPref = result.selectedArchiveServicePref || 'archiveToday';
-    const radioToSelect = document.getElementById(selectedPref + 'Radio');
-    if (radioToSelect) {
-      radioToSelect.checked = true;
+        chrome.tabs.create({ url: archiveUrl });
+      }
+
+    } catch (err) {
+      console.error(err);
+      showMessageBox('Archiving failed. Please try again.');
+    } finally {
+      document.body.classList.remove('busy');
+      archiveBtn.disabled = false; archiveBtn.textContent = originalLabel;
     }
-  });
+  }, 300);
 
-  // Save preference when a radio button is changed
-  document.querySelectorAll('input[name="archiveService"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-      chrome.storage.local.set({ selectedArchiveServicePref: this.value });
-    });
-  });
-
-  // Dark Mode Toggle Logic
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  const body = document.body;
-
-  // Load saved mode preference
-  chrome.storage.local.get(['darkModeEnabled'], function(result) {
-    if (result.darkModeEnabled === true) {
-      body.classList.add('dark-mode');
-      darkModeToggle.checked = true;
-    }
-  });
-
-  // Listen for changes on the toggle
-  darkModeToggle.addEventListener('change', function() {
-    if (this.checked) {
-      body.classList.add('dark-mode');
-      chrome.storage.local.set({ darkModeEnabled: true });
-    } else {
-      body.classList.remove('dark-mode');
-      chrome.storage.local.set({ darkModeEnabled: false });
-    }
-  });
+  archiveBtn.addEventListener('click', doArchive);
 });
+
+////////////////////////////////////////////////////////////////////////////////
+// 4.  OVERLAY STYLES (keeps user from closing popup mid-process)            //
+////////////////////////////////////////////////////////////////////////////////
+const style = document.createElement('style');
+style.textContent = `
+  body.busy::before{
+    content:'';position:fixed;inset:0;background:rgba(255,255,255,.6);
+    cursor:progress;z-index:9999;
+  }`;
+document.head.appendChild(style);
