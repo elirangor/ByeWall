@@ -1,6 +1,6 @@
-# Archive Blocked Articles - Chrome Extension
+# ByeWall - Chrome Extension
 
-📦 A browser extension to instantly access archived versions of the current page using:
+📦 A browser extension that helps you bypass paywalls and access blocked content by instantly retrieving the latest archived versions of web pages from:
 - [Archive.today](https://archive.today)
 - [Wayback Machine](https://web.archive.org)
 
@@ -8,8 +8,11 @@
 
 - One-click archive to selected services  
 - Remembers your preferred archive service  
-- Modern, minimal design  
-- Cross-platform compatibility  
+- Modern, minimal design 
+- Keeps track of the last 5 archived pages you've accessed
+- Cross-platform compatibility
+- RTL language support - proper display for right-to-left languages
+- Dark mode support - toggle between light and dark themes 
 
 ## 📸 Popup Interface Preview
 
@@ -29,9 +32,11 @@
 ## 🛠 Development Notes
 
 - `popup.js` handles UI logic  
+- `popup.html` - Clean, responsive interface with dark mode support
 - No external dependencies  
-- Simplified design for better reliability  
-- Special thanks to [@8288tom](https://github.com/8288tom) for improving the history functionality.
+- Simplified design - focused on reliability and ease of use  
+
+### Special thanks to [@8288tom](https://github.com/8288tom) for improving the history functionality.
 
 ## 📄 License
 

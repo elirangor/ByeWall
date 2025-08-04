@@ -1,4 +1,5 @@
-/* popup.js – ByeWall v1.5 */
+/* popup.js – ByeWall v1.5 ____________________________________________ */
+/* eslint-env browser, webextensions */
 
 ////////////////////////////////////////////////////////////////////////////////
 // 1. SMALL UTILS                                                             //
@@ -29,6 +30,7 @@ const debounce = (fn, wait) => {
 
 const isRTL = str => /[\u0590-\u05FF\u0600-\u06FF]/.test(str);
 
+/* promisified storage helpers */
 const getStorage = key => new Promise(r => chrome.storage.local.get(key, r));
 const setStorage = (key, val) => new Promise(r => chrome.storage.local.set({ [key]: val }, r));
 
@@ -40,7 +42,7 @@ async function saveToHistory(title, url, service, archiveUrl) {
   const { archiveHistory = [] } = await getStorage('archiveHistory');
   archiveHistory.unshift({ title, url, service, archiveUrl, timestamp: Date.now() });
   await setStorage('archiveHistory', archiveHistory.slice(0, 5));
-  loadHistory();
+  loadHistory();                       // refresh list in popup
 }
 
 async function loadHistory() {
@@ -93,26 +95,86 @@ async function loadHistory() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 3. MAIN – runs once popup DOM is ready                                     //
+// 3. WAYBACK MACHINE HELPER FUNCTIONS                                        //
+////////////////////////////////////////////////////////////////////////////////
+
+async function getLatestWaybackSnapshot(url) {
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 15000); // Increased timeout
+
+  try {
+    // First, try to get the latest snapshot using the CDX API
+    const cdxUrl = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(url)}&limit=1&sort=reverse`;
+    
+    const cdxResponse = await fetch(cdxUrl, { 
+      signal: ctrl.signal,
+      headers: { 'Accept': 'text/plain' }
+    });
+    
+    if (cdxResponse.ok) {
+      const cdxText = await cdxResponse.text();
+      const lines = cdxText.trim().split('\n');
+      
+      if (lines.length > 0 && lines[0]) {
+        const parts = lines[0].split(' ');
+        if (parts.length >= 2) {
+          const timestamp = parts[1];
+          const archiveUrl = `https://web.archive.org/web/${timestamp}/${url}`;
+          clearTimeout(timeoutId);
+          return archiveUrl;
+        }
+      }
+    }
+    
+    // Fallback to the availability API if CDX doesn't work
+    const availabilityUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`;
+    const availabilityResponse = await fetch(availabilityUrl, { 
+      signal: ctrl.signal, 
+      headers: { 'Accept': 'application/json' } 
+    });
+
+    clearTimeout(timeoutId);
+    
+    if (!availabilityResponse.ok) {
+      throw new Error(`HTTP ${availabilityResponse.status}`);
+    }
+    
+    const data = await availabilityResponse.json();
+    const snapshot = data.archived_snapshots?.closest;
+    
+    if (snapshot?.available) {
+      return snapshot.url;
+    }
+    
+    return null;
+    
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// 4. MAIN – runs once popup DOM is ready                                     //
 ////////////////////////////////////////////////////////////////////////////////
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[popup] loaded');
 
-  loadHistory();
+  loadHistory();                                   // build history list on open
 
-  // Restore previously chosen archive service
+  /* restore previously-chosen archive service */
   getStorage('selectedArchiveServicePref').then(({ selectedArchiveServicePref = 'archiveToday' }) => {
     const radio = document.getElementById(selectedArchiveServicePref + 'Radio');
     if (radio) radio.checked = true;
   });
 
-  // Remember service preference
+  /* remember service preference */
   document.querySelectorAll('input[name="archiveService"]').forEach(radio =>
     radio.addEventListener('change', () =>
       setStorage('selectedArchiveServicePref', radio.value)));
 
-  // Dark mode toggle
+  /* dark-mode toggle --------------------------------------------------- */
   (async () => {
     const { darkModeEnabled } = await getStorage('darkModeEnabled');
     const toggle = document.getElementById('darkModeToggle');
@@ -126,7 +188,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  // Archive button
+  /* -------------------------------------------------------------------- */
+  /* ARCHIVE BUTTON (+debounce)                                           */
+  /* -------------------------------------------------------------------- */
   const archiveBtn = document.getElementById('archive');
 
   const doArchive = debounce(async () => {
@@ -136,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const originalLabel = archiveBtn.textContent;
     archiveBtn.disabled = true;
     archiveBtn.textContent = 'Processing…';
-    document.body.classList.add('busy');
+    document.body.classList.add('busy');                // modal overlay
 
     try {
       const { url, title } = await getCurrentTabInfo();
@@ -144,19 +208,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (selRadio.value === 'archiveToday') {
         archiveUrl = `https://archive.today/?run=1&url=${encodeURIComponent(url)}`;
-      } else {
-        const ctrl = new AbortController();
-        const toId = setTimeout(() => ctrl.abort(), 10000);
-
-        const r = await fetch(
-          `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`,
-          { signal: ctrl.signal, headers: { Accept: 'application/json' } });
-
-        clearTimeout(toId);
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        const snap = (await r.json()).archived_snapshots?.closest;
-        if (snap?.available) archiveUrl = snap.url;
-        else showMessageBox('No archived version found in Wayback Machine.');
+      } else {                                         // Wayback Machine
+        // Use the improved Wayback Machine function
+        try {
+          archiveUrl = await getLatestWaybackSnapshot(url);
+          if (!archiveUrl) {
+            showMessageBox('No archived version found in Wayback Machine for this URL.');
+            return;
+          }
+        } catch (error) {
+          console.error('Wayback Machine error:', error);
+          showMessageBox('Failed to retrieve from Wayback Machine. The service might be temporarily unavailable.');
+          return;
+        }
       }
 
       if (archiveUrl) {
@@ -171,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
     } catch (err) {
-      console.error(err);
+      console.error('Archive error:', err);
       showMessageBox('Archiving failed. Please try again.');
     } finally {
       document.body.classList.remove('busy');
@@ -184,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 ////////////////////////////////////////////////////////////////////////////////
-// 4. OVERLAY STYLES (for processing lock)                                    //
+// 5. OVERLAY STYLES (keeps user from closing popup mid-process)             //
 ////////////////////////////////////////////////////////////////////////////////
 
 const style = document.createElement('style');
