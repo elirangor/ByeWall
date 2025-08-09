@@ -73,6 +73,12 @@ const setStorage = (key, val) =>
 
 async function saveToHistory(title, url, service, archiveUrl) {
   const { archiveHistory = [] } = await getStorage("archiveHistory");
+
+  // If this page URL is already in history, do nothing (avoid duplicates)
+  if (archiveHistory.some(item => item.url === url)) {
+    return;
+  }
+
   archiveHistory.unshift({
     title,
     url,
@@ -80,9 +86,11 @@ async function saveToHistory(title, url, service, archiveUrl) {
     archiveUrl,
     timestamp: Date.now(),
   });
+
   await setStorage("archiveHistory", archiveHistory.slice(0, 5));
   loadHistory(); // refresh list in popup
 }
+
 
 async function loadHistory() {
   const { archiveHistory = [] } = await getStorage("archiveHistory");
@@ -216,6 +224,60 @@ async function getLatestWaybackSnapshot(url) {
   }
 }
 
+/**
+ * Check whether Archive.today has a snapshot for a given URL.
+ * If a snapshot exists, returns the final snapshot URL; otherwise returns null.
+ * (Prevents opening a new tab that lands on the "No results" search page.)
+ */
+async function resolveArchiveTodaySnapshot(targetUrl) {
+  const ctrl = new AbortController();
+  const timeoutId = setTimeout(() => ctrl.abort(), 15000);
+
+  const probeUrl = `https://archive.today/newest/${targetUrl}`; // don't encode to preserve expected format
+
+  try {
+    // Follow redirects. If there is a snapshot, Archive.today issues a 30x to it.
+    const res = await fetch(probeUrl, {
+      redirect: "follow",
+      signal: ctrl.signal,
+      headers: { Accept: "text/html" },
+    });
+    clearTimeout(timeoutId);
+
+    // Redirected -> very likely a snapshot (or a mirror domain). Use it.
+    if (res.redirected) {
+      const finalUrl = res.url;
+      if (/\barchive\.(today|ph)\/\d{6,}\//.test(finalUrl)) {
+        return finalUrl;
+      }
+      // If it redirected somewhere unexpected (rare), still allow it—it won't be the "No results" page.
+      return finalUrl;
+    }
+
+    // Not redirected: read HTML and detect the "No results" search page.
+    const html = await res.text();
+    const looksLikeSearch =
+      /No results/i.test(html) || /search examples/i.test(html);
+    if (looksLikeSearch) {
+      return null;
+    }
+
+    // If response URL already looks like a timestamped snapshot, accept it.
+    if (/\barchive\.(today|ph)\/\d{6,}\//.test(res.url)) {
+      return res.url;
+    }
+
+    // Unsure -> be conservative and report no snapshot to avoid opening a useless tab.
+    return null;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    // Propagate timeout so caller can show a specific message.
+    if (err.name === "AbortError") throw err;
+    // For all other network errors, treat as "no snapshot" and let caller show a generic error.
+    return null;
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // 4. MAIN – runs once popup DOM is ready                                     //
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,8 +365,27 @@ document.addEventListener("DOMContentLoaded", () => {
       let archiveUrl = null;
 
       if (selRadio.value === "archiveToday") {
-        // Go directly to newest snapshot instead of search results
-        archiveUrl = `https://archive.today/newest/${url}`;
+        // Only open a tab if Archive.today actually has a snapshot
+        let resolved;
+        try {
+          resolved = await resolveArchiveTodaySnapshot(url);
+        } catch (error) {
+          if (error.name === "AbortError") {
+            showMessageBox(
+              "Request timed out. The archive service might be slow."
+            );
+            return;
+          }
+          // fall through to generic message below
+        }
+
+        if (!resolved) {
+          showMessageBox(
+            "No archived version found on Archive.today for this URL."
+          );
+          return; // <-- don't open a tab
+        }
+        archiveUrl = resolved;
       } else {
         // Wayback Machine
         try {
