@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.5 ____________________________________________ */
+/* popup.js – ByeWall v1.6 ____________________________________________ */
 /* eslint-env browser, webextensions */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,14 +80,29 @@ async function loadHistory() {
       formattedDate = `${hours}:${minutes}, ${dt.getDate()}/${dt.getMonth() + 1}/${dt.getFullYear().toString().slice(2)}`;
     }
 
-    link.innerHTML = `
-      <div class="history-item-content">
-        <span class="title">${item.title}</span>
-        <div class="details">
-          <span>${item.service}</span>
-          <span>${formattedDate}</span>
-        </div>
-      </div>`;
+    // ---- XSS-HARDENED RENDERING (no innerHTML) ----------------------------
+    const wrap = document.createElement('div');
+    wrap.className = 'history-item-content';
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'title';
+    titleEl.textContent = item.title;
+
+    const details = document.createElement('div');
+    details.className = 'details';
+
+    const svc = document.createElement('span');
+    svc.textContent = item.service;
+
+    const ts = document.createElement('span');
+    ts.textContent = formattedDate;
+
+    details.appendChild(svc);
+    details.appendChild(ts);
+    wrap.appendChild(titleEl);
+    wrap.appendChild(details);
+    link.appendChild(wrap);
+    // ----------------------------------------------------------------------
 
     li.appendChild(link);
     list.appendChild(li);
