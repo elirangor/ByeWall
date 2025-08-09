@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.6 ____________________________________________ */
+/* popup.js – ByeWall v1.5 ____________________________________________ */
 /* eslint-env browser, webextensions */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,22 @@ function getCurrentTabInfo() {
   return new Promise(resolve =>
     chrome.tabs.query({ active: true, currentWindow: true },
       tabs => resolve({ url: tabs[0].url, title: tabs[0].title })));
+}
+
+// Security: URL validation
+function isValidUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+// Check for unsupported URL types
+function isUnsupportedUrl(url) {
+  const unsupportedProtocols = ['chrome-extension://', 'file://', 'about:', 'moz-extension://', 'edge-extension://'];
+  return unsupportedProtocols.some(protocol => url.startsWith(protocol));
 }
 
 const debounce = (fn, wait) => {
@@ -58,6 +74,7 @@ async function loadHistory() {
     const link = document.createElement('a');
     link.href = item.archiveUrl;
     link.target = '_blank';
+    link.rel = 'noopener noreferrer'; // Security fix
     link.className = 'history-item';
 
     const isRightToLeft = isRTL(item.title);
@@ -80,7 +97,7 @@ async function loadHistory() {
       formattedDate = `${hours}:${minutes}, ${dt.getDate()}/${dt.getMonth() + 1}/${dt.getFullYear().toString().slice(2)}`;
     }
 
-    // ---- XSS-HARDENED RENDERING (no innerHTML) ----------------------------
+    // XSS-HARDENED RENDERING (no innerHTML) - SECURITY FIX
     const wrap = document.createElement('div');
     wrap.className = 'history-item-content';
 
@@ -102,7 +119,6 @@ async function loadHistory() {
     wrap.appendChild(titleEl);
     wrap.appendChild(details);
     link.appendChild(wrap);
-    // ----------------------------------------------------------------------
 
     li.appendChild(link);
     list.appendChild(li);
@@ -110,7 +126,7 @@ async function loadHistory() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// 3. WAYBACK MACHINE HELPER FUNCTIONS                                        //
+// 3. ARCHIVE HELPER FUNCTIONS                                                //
 ////////////////////////////////////////////////////////////////////////////////
 
 async function getLatestWaybackSnapshot(url) {
@@ -204,27 +220,51 @@ document.addEventListener('DOMContentLoaded', () => {
   })();
 
   /* -------------------------------------------------------------------- */
-  /* ARCHIVE BUTTON (+debounce)                                           */
+  /* ARCHIVE BUTTON (+debounce + rate limiting)                          */
   /* -------------------------------------------------------------------- */
   const archiveBtn = document.getElementById('archive');
+  
+  // Rate limiting
+  let lastRequest = 0;
+  const MIN_REQUEST_INTERVAL = 2000; // 2 seconds between requests
 
   const doArchive = debounce(async () => {
     const selRadio = document.querySelector('input[name="archiveService"]:checked');
     if (!selRadio) return showMessageBox('Please select an archive service.');
 
+    // Rate limiting check
+    const now = Date.now();
+    if (now - lastRequest < MIN_REQUEST_INTERVAL) {
+      showMessageBox('Please wait before trying again.');
+      return;
+    }
+    lastRequest = now;
+
     const originalLabel = archiveBtn.textContent;
     archiveBtn.disabled = true;
-    archiveBtn.textContent = 'Processing…';
+    archiveBtn.textContent = 'Searching…';
     document.body.classList.add('busy');                // modal overlay
 
     try {
       const { url, title } = await getCurrentTabInfo();
+      
+      // Security: URL validation
+      if (!isValidUrl(url)) {
+        showMessageBox('Invalid URL detected.');
+        return;
+      }
+      
+      if (isUnsupportedUrl(url)) {
+        showMessageBox('Cannot archive this type of page.');
+        return;
+      }
+
       let archiveUrl = null;
 
       if (selRadio.value === 'archiveToday') {
-        archiveUrl = `https://archive.today/?run=1&url=${encodeURIComponent(url)}`;
+        // Go directly to newest snapshot instead of search results
+        archiveUrl = `https://archive.today/newest/${url}`;
       } else {                                         // Wayback Machine
-        // Use the improved Wayback Machine function
         try {
           archiveUrl = await getLatestWaybackSnapshot(url);
           if (!archiveUrl) {
@@ -233,7 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (error) {
           console.error('Wayback Machine error:', error);
-          showMessageBox('Failed to retrieve from Wayback Machine. The service might be temporarily unavailable.');
+          if (error.name === 'AbortError') {
+            showMessageBox('Request timed out. The archive service might be slow.');
+          } else if (error.message.includes('HTTP 429')) {
+            showMessageBox('Rate limited. Please try again in a minute.');
+          } else {
+            showMessageBox('Wayback Machine service unavailable. Try Archive.Today instead.');
+          }
           return;
         }
       }
@@ -251,13 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (err) {
       console.error('Archive error:', err);
-      showMessageBox('Archiving failed. Please try again.');
+      showMessageBox('Service unavailable. Please try again or use the other archive option.');
     } finally {
       document.body.classList.remove('busy');
       archiveBtn.disabled = false;
       archiveBtn.textContent = originalLabel;
     }
-  }, 300);
+  }, 500); // Increased debounce time
 
   archiveBtn.addEventListener('click', doArchive);
 });
