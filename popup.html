@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Archive Article</title>
@@ -9,7 +10,8 @@
       font-family: "Inter", sans-serif;
       background-color: #f8f9fa;
       padding: 12px;
-      width: 350px; /* Made the popup wider */
+      width: 350px;
+      /* Made the popup wider */
       margin: 0;
       box-sizing: border-box;
       /* Removed max-height and overflow to allow content to be fully visible */
@@ -27,11 +29,12 @@
     h3 {
       margin: 0;
       color: #212529;
-      font-size: 20px; /* Made the title bigger */
+      font-size: 20px;
+      /* Made the title bigger */
       font-weight: 600;
       transition: color 0.3s;
     }
-    
+
     /* New: Styling for the history list heading */
     h4 {
       margin: 0 0 8px 0;
@@ -127,7 +130,7 @@
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0,0,0,0.4);
+      background-color: rgba(0, 0, 0, 0.4);
       align-items: center;
       justify-content: center;
     }
@@ -140,7 +143,7 @@
       width: 80%;
       max-width: 300px;
       border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       text-align: center;
       transition: background-color 0.3s, border-color 0.3s;
     }
@@ -171,9 +174,10 @@
       background-color: #26292e;
       color: #e0e0e0;
     }
-    
+
     .dark-mode h3,
-    .dark-mode h4 { /* New: Apply dark mode to history heading */
+    .dark-mode h4 {
+      /* New: Apply dark mode to history heading */
       color: #f0f0f0;
     }
 
@@ -268,14 +272,14 @@
       border-radius: 50%;
     }
 
-    input:checked + .slider {
+    input:checked+.slider {
       background-color: #2196F3;
     }
 
-    input:checked + .slider:before {
+    input:checked+.slider:before {
       transform: translateX(20px);
     }
-    
+
     /* New: History Section Styling */
     .history-item {
       background: #fff;
@@ -289,7 +293,7 @@
       text-decoration: none;
       transition: background-color 0.2s, color 0.2s;
     }
-    
+
     .history-item-content {
       display: flex;
       flex-direction: column;
@@ -299,7 +303,8 @@
       font-weight: 600;
       white-space: normal;
       word-wrap: break-word;
-      font-size: 13px; /* Slightly increased font size */
+      font-size: 13px;
+      /* Slightly increased font size */
     }
 
     .history-item-content .details {
@@ -312,32 +317,34 @@
 
     /* New: RTL support for history items */
     .history-item.rtl {
-        direction: rtl;
-        text-align: right;
+      direction: rtl;
+      text-align: right;
     }
+
     .history-item.rtl .history-item-content .details {
-        flex-direction: row-reverse;
+      flex-direction: row-reverse;
     }
 
     .history-item:hover {
       background-color: #f1f3f5;
     }
-    
+
     .dark-mode .history-item {
       background: #31363d;
       border-color: #444c56;
       color: #e0e0e0;
     }
-    
+
     .dark-mode .history-item:hover {
       background-color: #3e444b;
     }
-    
+
     .dark-mode .history-item-content .details {
-        color: #a0a0a0;
+      color: #a0a0a0;
     }
   </style>
 </head>
+
 <body>
   <div class="header-container">
     <h3> ByeWall 📰</h3>
@@ -359,7 +366,7 @@
       Wayback Machine
     </label>
   </div>
-  
+
   <!-- Section for displaying recently archived articles -->
   <div id="history-section" style="margin-top: 12px; display: none;">
     <h4>Recently Archived</h4>
@@ -385,4 +392,5 @@
 
   <script src="popup.js"></script>
 </body>
+
 </html>

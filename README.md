@@ -38,6 +38,11 @@
 
 ### Special thanks to [@8288tom](https://github.com/8288tom) for improving the history functionality.
 
+#### 🔒 Security Features
+- URL validation and XSS protection
+- Rate limiting to prevent service abuse  
+- Secure external link handling
+
 ## 📄 License
 
 MIT – free to use and modify.
