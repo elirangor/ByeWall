@@ -16,10 +16,7 @@
 
 ## 📸 Popup Interface Preview
 
-
 <img src="screenshot.png" alt="Screenshot of ByeWall popup" width="250">
-
-
 
 ## 🔧 How to Install
 
@@ -42,6 +39,31 @@
 - URL validation and XSS protection
 - Rate limiting to prevent service abuse  
 - Secure external link handling
+
+---
+
+## ✨ Recent Improvements (v1.7.x)
+
+- **No empty tabs**: background pre-check for Archive.today (1s timeout) shows an inline “No snapshot available” instead.  
+- **Faster popup**: warm pre-check on open, smaller HTML sniff, 100ms click debounce.  
+- **CSP-safe + instant dark mode**: early script moved to `popup-early.js`; no white flash; fonts load non-blocking.  
+- **Cleaner history**: dedupes by normalized URL (drops UTM/hash, trims slashes); keeps only the latest visit per page (max 5).  
+- **Clearer radios**: unchecked = gray ring, checked = blue dot (clearer in light mode).
+
+## 🔍 How It Decides to Open a Tab
+
+1. Background checks `archive.today/newest/<url>`.  
+2. If a snapshot exists → opens the archive in a new tab.  
+3. If “No results” or timeout → shows a message in the popup (no tab opened).  
+4. Wayback Machine flow is unchanged.
+
+## 🔐 Permissions
+
+- `https://archive.today/*`, `https://archive.ph/*` – Archive.today pre-checks  
+- `https://web.archive.org/*`, `https://archive.org/*` – Wayback lookups  
+- `tabs`, `activeTab`, `storage` – open result tab, read current URL, store prefs/history
+
+---
 
 ## 📄 License
 
