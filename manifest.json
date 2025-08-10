@@ -1,33 +1,30 @@
 {
   "manifest_version": 3,
   "name": "ByeWall",
-  "version": "1.7",
-  "description": "Bypass paywalls by accessing archived versions via Archive.today or Wayback Machine. View recently archived articles in a clean interface.",
-  "permissions": ["activeTab", "storage"],
+  "version": "1.7.3",
+  "description": "Quickly open archived snapshots without opening empty tabs.",
+  "action": {
+    "default_title": "ByeWall",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "activeTab"
+  ],
   "host_permissions": [
-    "https://archive.org/*",
     "https://archive.today/*",
     "https://archive.ph/*",
-    "https://web.archive.org/*"
+    "https://web.archive.org/*",
+    "https://archive.org/*"
   ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_title": "ByeWall - Archive Current Page",
-    "default_icon": {
-      "16": "icon.png",
-      "32": "icon.png",
-      "48": "icon.png",
-      "128": "icon.png"
-    }
-  },
   "icons": {
     "16": "icon.png",
     "32": "icon.png",
     "48": "icon.png",
     "128": "icon.png"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://archive.org https://archive.today https://archive.ph https://web.archive.org;"
-  },
-  "minimum_chrome_version": "88"
+  }
 }

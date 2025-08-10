@@ -1,24 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+  <!-- Run before paint (CSP-safe): sets dark mode instantly -->
+  <script src="popup-early.js"></script>
+
   <meta charset="UTF-8" />
+  <meta name="color-scheme" content="dark light">
   <title>Archive Article</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Fonts (non-blocking, no inline onload) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link id="fontLink"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet" media="print">
+
   <style>
     body {
       font-family: "Inter", sans-serif;
       background-color: #f8f9fa;
       padding: 12px;
       width: 350px;
-      /* Made the popup wider */
       margin: 0;
       box-sizing: border-box;
-      /* Removed max-height and overflow to allow content to be fully visible */
       transition: background-color 0.3s, color 0.3s;
     }
 
-    /* Header Container to hold title and toggle */
     .header-container {
       display: flex;
       justify-content: space-between;
@@ -30,12 +36,10 @@
       margin: 0;
       color: #212529;
       font-size: 20px;
-      /* Made the title bigger */
       font-weight: 600;
       transition: color 0.3s;
     }
 
-    /* New: Styling for the history list heading */
     h4 {
       margin: 0 0 8px 0;
       font-size: 14px;
@@ -61,17 +65,49 @@
       color: #495057;
       transition: color 0.3s;
     }
+    label:last-child { margin-bottom: 0; }
 
-    label:last-child {
-      margin-bottom: 0;
-    }
-
-    input[type="radio"] {
-      margin-right: 10px;
+    /* -------- Custom radios: clearer states -------- */
+    input[type="radio"]{
+      -webkit-appearance: none;
+      appearance: none;
       width: 16px;
       height: 16px;
-      accent-color: #007bff;
+      margin-right: 10px;
+      border-radius: 50%;
+      border: 2px solid #cfd4da;      /* light gray ring when NOT checked */
+      background: #fff;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      transition: border-color .15s ease, background-color .15s ease;
     }
+    input[type="radio"]::before{
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transform: scale(0);            /* hidden when NOT checked */
+      transition: transform .15s ease;
+      background: #0d6efd;            /* checked dot color (blue) */
+    }
+    input[type="radio"]:checked{
+      border-color: #0d6efd;          /* ring matches the dot when checked */
+    }
+    input[type="radio"]:checked::before{
+      transform: scale(1);            /* show dot when checked */
+    }
+    input[type="radio"]:focus-visible{
+      outline: 2px solid rgba(13,110,253,.55);
+      outline-offset: 2px;
+    }
+    /* Dark mode tweaks */
+    .dark-mode input[type="radio"]{
+      border-color: #6c757d;
+      background: #2b2f36;
+    }
+    .dark-mode input[type="radio"]::before{ background: #4a9eff; }
+    .dark-mode input[type="radio"]:checked{ border-color: #4a9eff; }
 
     button {
       width: 100%;
@@ -86,19 +122,12 @@
       transition: all 0.2s ease;
       box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
     }
-
     button:hover:not(:disabled) {
       background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
       box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
       transform: translateY(-1px);
     }
-
-    button:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    button:disabled { background: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .credit {
       margin-top: 12px;
@@ -109,32 +138,19 @@
       border-top: 1px solid #e9ecef;
       transition: color 0.3s, border-color 0.3s;
     }
+    .credit a { color: #007bff; text-decoration: none; font-weight: 500; }
+    .credit a:hover { text-decoration: underline; }
 
-    .credit a {
-      color: #007bff;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .credit a:hover {
-      text-decoration: underline;
-    }
-
-    /* Custom Message Box Styles */
+    /* Message Box */
     .message-box {
       display: none;
       position: fixed;
       z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
+      inset: 0;
       background-color: rgba(0, 0, 0, 0.4);
       align-items: center;
       justify-content: center;
     }
-
     .message-box-content {
       background-color: #fefefe;
       margin: auto;
@@ -147,207 +163,53 @@
       text-align: center;
       transition: background-color 0.3s, border-color 0.3s;
     }
+    .message-box-content p { margin-bottom: 15px; font-size: 14px; color: #333; transition: color 0.3s; }
+    .message-box-content button { background: #007bff; color: white; padding: 8px 15px; border: 0; border-radius: 5px; font-size: 13px; }
+    .message-box-content button:hover { background: #0056b3; }
 
-    .message-box-content p {
-      margin-bottom: 15px;
-      font-size: 14px;
-      color: #333;
-      transition: color 0.3s;
-    }
+    /* Dark Mode */
+    .dark-mode { background-color: #26292e; color: #e0e0e0; }
+    .dark-mode h3, .dark-mode h4 { color: #f0f0f0; }
+    .dark-mode .options-section, .dark-mode .message-box-content { background: #31363d; border-color: #444c56; }
+    .dark-mode label { color: #e0e0e0; }
+    .dark-mode button { background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%); box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3); }
+    .dark-mode button:hover:not(:disabled) { background: linear-gradient(135deg, #357abd 0%, #2563eb 100%); box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4); }
+    .dark-mode .message-box-content p { color: #e0e0e0; }
+    .dark-mode .message-box-content button { background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%); }
+    .dark-mode .message-box-content button:hover { background: linear-gradient(135deg, #357abd 0%, #2563eb 100%); }
+    .dark-mode .credit { color: #a0a0a0; border-color: #444c56; }
+    .dark-mode .credit a { color: #6db3ff; }
+    .dark-mode .credit a:hover { color: #4a9eff; }
 
-    .message-box-content button {
-      background: #007bff;
-      color: white;
-      padding: 8px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 13px;
-    }
+    .toggle-container { display: flex; justify-content: flex-end; }
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+    .slider:before { content: ""; position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background: #fff; transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #2196F3; }
+    input:checked + .slider:before { transform: translateX(20px); }
 
-    .message-box-content button:hover {
-      background: #0056b3;
-    }
-
-    /* Dark Mode styles */
-    .dark-mode {
-      background-color: #26292e;
-      color: #e0e0e0;
-    }
-
-    .dark-mode h3,
-    .dark-mode h4 {
-      /* New: Apply dark mode to history heading */
-      color: #f0f0f0;
-    }
-
-    .dark-mode .options-section,
-    .dark-mode .message-box-content {
-      background: #31363d;
-      border-color: #444c56;
-    }
-
-    .dark-mode label {
-      color: #e0e0e0;
-    }
-
-    .dark-mode input[type="radio"] {
-      accent-color: #4a9eff;
-    }
-
-    .dark-mode button {
-      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-      box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
-    }
-
-    .dark-mode button:hover:not(:disabled) {
-      background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-      box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4);
-    }
-
-    .dark-mode .message-box-content p {
-      color: #e0e0e0;
-    }
-
-    .dark-mode .message-box-content button {
-      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-    }
-
-    .dark-mode .message-box-content button:hover {
-      background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-    }
-
-    .dark-mode .credit {
-      color: #a0a0a0;
-      border-color: #444c56;
-    }
-
-    .dark-mode .credit a {
-      color: #6db3ff;
-    }
-
-    .dark-mode .credit a:hover {
-      color: #4a9eff;
-    }
-
-    .toggle-container {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .toggle-switch {
-      position: relative;
-      display: inline-block;
-      width: 40px;
-      height: 20px;
-    }
-
-    .toggle-switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: .4s;
-      border-radius: 20px;
-    }
-
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 16px;
-      width: 16px;
-      left: 2px;
-      bottom: 2px;
-      background-color: white;
-      transition: .4s;
-      border-radius: 50%;
-    }
-
-    input:checked+.slider {
-      background-color: #2196F3;
-    }
-
-    input:checked+.slider:before {
-      transform: translateX(20px);
-    }
-
-    /* New: History Section Styling */
+    /* History */
     .history-item {
-      background: #fff;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
-      padding: 8px;
-      margin-bottom: 5px;
-      display: block;
-      font-size: 12px;
-      color: #333;
-      text-decoration: none;
+      background: #fff; border: 1px solid #e9ecef; border-radius: 4px;
+      padding: 8px; margin-bottom: 5px; display: block; font-size: 12px; color: #333; text-decoration: none;
       transition: background-color 0.2s, color 0.2s;
     }
-
-    .history-item-content {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .history-item-content .title {
-      font-weight: 600;
-      white-space: normal;
-      word-wrap: break-word;
-      font-size: 13px;
-      /* Slightly increased font size */
-    }
-
-    .history-item-content .details {
-      font-size: 10px;
-      color: #6c757d;
-      display: flex;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-
-    /* New: RTL support for history items */
-    .history-item.rtl {
-      direction: rtl;
-      text-align: right;
-    }
-
-    .history-item.rtl .history-item-content .details {
-      flex-direction: row-reverse;
-    }
-
-    .history-item:hover {
-      background-color: #f1f3f5;
-    }
-
-    .dark-mode .history-item {
-      background: #31363d;
-      border-color: #444c56;
-      color: #e0e0e0;
-    }
-
-    .dark-mode .history-item:hover {
-      background-color: #3e444b;
-    }
-
-    .dark-mode .history-item-content .details {
-      color: #a0a0a0;
-    }
+    .history-item-content { display: flex; flex-direction: column; }
+    .history-item-content .title { font-weight: 600; white-space: normal; word-wrap: break-word; font-size: 13px; }
+    .history-item-content .details { font-size: 10px; color: #6c757d; display: flex; justify-content: space-between; margin-top: 4px; }
+    .history-item.rtl { direction: rtl; text-align: right; }
+    .history-item.rtl .history-item-content .details { flex-direction: row-reverse; }
+    .history-item:hover { background-color: #f1f3f5; }
+    .dark-mode .history-item { background: #31363d; border-color: #444c56; color: #e0e0e0; }
+    .dark-mode .history-item:hover { background-color: #3e444b; }
+    .dark-mode .history-item-content .details { color: #a0a0a0; }
   </style>
 </head>
 
 <body>
   <div class="header-container">
-    <h3> ByeWall 📰</h3>
+    <h3>ByeWall 📰</h3>
     <div class="toggle-container">
       <label class="toggle-switch">
         <input type="checkbox" id="darkModeToggle">
@@ -367,12 +229,9 @@
     </label>
   </div>
 
-  <!-- Section for displaying recently archived articles -->
   <div id="history-section" style="margin-top: 12px; display: none;">
     <h4>Recently Archived</h4>
-    <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;">
-      <!-- History items will be inserted here by popup.js -->
-    </ul>
+    <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;"></ul>
   </div>
 
   <button id="archive">Read Behind the Wall</button>
@@ -392,5 +251,4 @@
 
   <script src="popup.js"></script>
 </body>
-
 </html>
