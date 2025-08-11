@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.7.3 (CSP-safe, faster pre-check, deduped history) */
+/* popup.js – ByeWall v1.7.5 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
 /* eslint-env browser, webextensions */
 
 /* ============================================================================
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 7) Archive button with tighter debounce
+  // 7) Archive button with fallback mechanism
   const archiveBtn = document.getElementById("archive");
   let lastRequest = 0;
   const MIN_REQUEST_INTERVAL = 2000;
@@ -327,6 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
       let archiveUrl = null;
 
       if (selRadio.value === "archiveToday") {
+        let shouldTryAnyway = false;
+        
         try {
           let hasSnapshot;
           if (warmPrecheckPromise && warmPrecheckUrl === url) {
@@ -342,16 +344,20 @@ document.addEventListener("DOMContentLoaded", () => {
             showMessageBox("No snapshot available for this site.");
             return;
           }
-          // open /newest/ and let Archive.today redirect to the snapshot
-          archiveUrl = `https://archive.today/newest/${url}`;
         } catch (e) {
           console.error("Archive.today pre-check error:", e);
-          if (e && e.message === "ARCHIVE_TODAY_TIMEOUT") {
-            showMessageBox("Archive.today timed out. Try again or use Wayback.");
-          } else {
-            showMessageBox("Archive.today seems unavailable right now.");
-          }
-          return;
+          // Instead of showing error, we'll try anyway
+          shouldTryAnyway = true;
+        }
+
+        // Always proceed to open the archive URL, either because:
+        // 1. Pre-check succeeded and found a snapshot, OR
+        // 2. Pre-check failed but we're trying anyway (fallback)
+        archiveUrl = `https://archive.today/newest/${url}`;
+        
+        if (shouldTryAnyway) {
+          // Update button text to indicate we're trying despite the pre-check failure
+          archiveBtn.textContent = "Trying anyway…";
         }
       } else {
         // Wayback Machine
@@ -391,7 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
       archiveBtn.disabled = false;
       archiveBtn.textContent = originalLabel;
     }
-  }, 100); // was 500
+  }, 100);
 
   if (archiveBtn) archiveBtn.addEventListener("click", doArchive);
 });
