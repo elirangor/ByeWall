@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.7.5 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
+/* popup.js – ByeWall v1.7.6 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
 /* eslint-env browser, webextensions */
 
 /* ============================================================================
@@ -39,7 +39,7 @@ function isUnsupportedUrl(url) {
     "about:",
     "file://",
     "moz-extension://",
-    "opera://"
+    "opera://",
   ];
   return unsupported.some((p) => url.startsWith(p));
 }
@@ -54,8 +54,10 @@ const debounce = (fn, wait) => {
 
 const isRTL = (str) => /[\u0590-\u05FF\u0600-\u06FF]/.test(str);
 
-const getStorage = (key) => new Promise((r) => chrome.storage.local.get(key, r));
-const setStorage = (key, val) => new Promise((r) => chrome.storage.local.set({ [key]: val }, r));
+const getStorage = (key) =>
+  new Promise((r) => chrome.storage.local.get(key, r));
+const setStorage = (key, val) =>
+  new Promise((r) => chrome.storage.local.set({ [key]: val }, r));
 
 /* Normalize URLs so the same page (with utm params, ports, hash) dedupes */
 function normalizeHistoryUrl(raw) {
@@ -65,17 +67,32 @@ function normalizeHistoryUrl(raw) {
     u.hostname = u.hostname.toLowerCase();
 
     // drop common trackers
-    const drop = ["utm_source","utm_medium","utm_campaign","utm_term","utm_content","utm_id","gclid","fbclid","mc_cid","mc_eid"];
+    const drop = [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_term",
+      "utm_content",
+      "utm_id",
+      "gclid",
+      "fbclid",
+      "mc_cid",
+      "mc_eid",
+    ];
     drop.forEach((k) => u.searchParams.delete(k));
     const qs = u.searchParams.toString();
     u.search = qs ? "?" + qs : "";
 
     // tidy path (keep "/" for root)
-    const clean = u.pathname.replace(/\/+$/,"");
+    const clean = u.pathname.replace(/\/+$/, "");
     u.pathname = clean || "/";
 
     // remove default ports
-    if ((u.protocol === "https:" && u.port === "443") || (u.protocol === "http:" && u.port === "80")) u.port = "";
+    if (
+      (u.protocol === "https:" && u.port === "443") ||
+      (u.protocol === "http:" && u.port === "80")
+    )
+      u.port = "";
 
     return u.toString();
   } catch {
@@ -93,7 +110,8 @@ function hasArchiveTodaySnapshotQuick(url, timeoutMs = 1000) {
       (res) => {
         if (chrome.runtime.lastError) return reject(chrome.runtime.lastError);
         if (!res || res.ok === false) {
-          if (res?.error === "ARCHIVE_TODAY_TIMEOUT") return reject(new Error("ARCHIVE_TODAY_TIMEOUT"));
+          if (res?.error === "ARCHIVE_TODAY_TIMEOUT")
+            return reject(new Error("ARCHIVE_TODAY_TIMEOUT"));
           return reject(new Error(res?.error || "PRECHECK_FAILED"));
         }
         resolve(res.hasSnapshot);
@@ -121,7 +139,7 @@ async function saveToHistory(title, url, service, archiveUrl) {
     normUrl: norm,
     service,
     archiveUrl,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 
   await setStorage("archiveHistory", filtered.slice(0, 5));
@@ -191,8 +209,12 @@ async function loadHistory() {
 
     const ts = document.createElement("span");
     ts.textContent = rtl
-      ? `${dt.getDate()}/${dt.getMonth() + 1}/${String(dt.getFullYear()).slice(2)}, ${hours}:${minutes}`
-      : `${hours}:${minutes}, ${dt.getDate()}/${dt.getMonth() + 1}/${String(dt.getFullYear()).slice(2)}`;
+      ? `${dt.getDate()}/${dt.getMonth() + 1}/${String(dt.getFullYear()).slice(
+          2
+        )}, ${hours}:${minutes}`
+      : `${hours}:${minutes}, ${dt.getDate()}/${dt.getMonth() + 1}/${String(
+          dt.getFullYear()
+        ).slice(2)}`;
 
     meta.appendChild(svc);
     meta.appendChild(ts);
@@ -212,8 +234,13 @@ async function getLatestWaybackSnapshot(url) {
   const timer = setTimeout(() => ctrl.abort(), 15000);
 
   try {
-    const cdxUrl = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(url)}&limit=1&sort=reverse`;
-    const cdxResp = await fetch(cdxUrl, { signal: ctrl.signal, headers: { Accept: "text/plain" } });
+    const cdxUrl = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(
+      url
+    )}&limit=1&sort=reverse`;
+    const cdxResp = await fetch(cdxUrl, {
+      signal: ctrl.signal,
+      headers: { Accept: "text/plain" },
+    });
     if (cdxResp.ok) {
       const text = (await cdxResp.text()).trim();
       const line = text.split("\n")[0] || "";
@@ -225,8 +252,13 @@ async function getLatestWaybackSnapshot(url) {
       }
     }
 
-    const availUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(url)}`;
-    const availResp = await fetch(availUrl, { signal: ctrl.signal, headers: { Accept: "application/json" } });
+    const availUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(
+      url
+    )}`;
+    const availResp = await fetch(availUrl, {
+      signal: ctrl.signal,
+      headers: { Accept: "application/json" },
+    });
     clearTimeout(timer);
     if (!availResp.ok) throw new Error(`HTTP ${availResp.status}`);
 
@@ -252,23 +284,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 1) Close button for modal
   const btn = document.getElementById("messageBoxClose");
-  if (btn) btn.addEventListener("click", () => {
-    const box = document.getElementById("messageBox");
-    if (box) box.style.display = "none";
-  });
+  if (btn)
+    btn.addEventListener("click", () => {
+      const box = document.getElementById("messageBox");
+      if (box) box.style.display = "none";
+    });
 
   // 2) Load history (dedup happens inside)
   loadHistory();
 
   // 3) Restore selected service
-  getStorage("selectedArchiveServicePref").then(({ selectedArchiveServicePref = "archiveToday" }) => {
-    const radio = document.getElementById(selectedArchiveServicePref + "Radio");
-    if (radio) radio.checked = true;
-  });
+  getStorage("selectedArchiveServicePref").then(
+    ({ selectedArchiveServicePref = "archiveToday" }) => {
+      const radio = document.getElementById(
+        selectedArchiveServicePref + "Radio"
+      );
+      if (radio) radio.checked = true;
+    }
+  );
 
   // 4) Remember preference
   document.querySelectorAll('input[name="archiveService"]').forEach((r) => {
-    r.addEventListener("change", () => setStorage("selectedArchiveServicePref", r.value));
+    r.addEventListener("change", () =>
+      setStorage("selectedArchiveServicePref", r.value)
+    );
   });
 
   // 5) Dark mode toggle (mirror to localStorage to prevent next-open flash)
@@ -284,7 +323,9 @@ document.addEventListener("DOMContentLoaded", () => {
       toggle.addEventListener("change", () => {
         document.body.classList.toggle("dark-mode", toggle.checked);
         setStorage("darkModeEnabled", toggle.checked);
-        try { localStorage.setItem("darkModeEnabled", String(toggle.checked)); } catch {}
+        try {
+          localStorage.setItem("darkModeEnabled", String(toggle.checked));
+        } catch {}
       });
     }
   })();
@@ -294,7 +335,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const { url } = await getCurrentTabInfo();
     if (isValidUrl(url) && !isUnsupportedUrl(url)) {
       warmPrecheckUrl = url;
-      warmPrecheckPromise = hasArchiveTodaySnapshotQuick(url, 1000).catch(() => null);
+      warmPrecheckPromise = hasArchiveTodaySnapshotQuick(url, 1000).catch(
+        () => null
+      );
     }
   })();
 
@@ -304,7 +347,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const MIN_REQUEST_INTERVAL = 2000;
 
   const doArchive = debounce(async () => {
-    const selRadio = document.querySelector('input[name="archiveService"]:checked');
+    const selRadio = document.querySelector(
+      'input[name="archiveService"]:checked'
+    );
     if (!selRadio) return showMessageBox("Please select an archive service.");
 
     const now = Date.now();
@@ -322,13 +367,14 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const { url, title } = await getCurrentTabInfo();
       if (!isValidUrl(url)) return showMessageBox("Invalid URL detected.");
-      if (isUnsupportedUrl(url)) return showMessageBox("Cannot archive this type of page.");
+      if (isUnsupportedUrl(url))
+        return showMessageBox("Cannot archive this type of page.");
 
       let archiveUrl = null;
 
       if (selRadio.value === "archiveToday") {
         let shouldTryAnyway = false;
-        
+
         try {
           let hasSnapshot;
           if (warmPrecheckPromise && warmPrecheckUrl === url) {
@@ -345,7 +391,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
         } catch (e) {
-          console.error("Archive.today pre-check error:", e);
+          // Only log unexpected errors, not timeouts (which are handled gracefully)
+          if (e.message !== "ARCHIVE_TODAY_TIMEOUT") {
+            console.error("Archive.today pre-check error:", e);
+          }
           // Instead of showing error, we'll try anyway
           shouldTryAnyway = true;
         }
@@ -354,7 +403,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 1. Pre-check succeeded and found a snapshot, OR
         // 2. Pre-check failed but we're trying anyway (fallback)
         archiveUrl = `https://archive.today/newest/${url}`;
-        
+
         if (shouldTryAnyway) {
           // Update button text to indicate we're trying despite the pre-check failure
           archiveBtn.textContent = "Trying anyway…";
@@ -364,17 +413,23 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
           archiveUrl = await getLatestWaybackSnapshot(url);
           if (!archiveUrl) {
-            showMessageBox("No archived version found in Wayback Machine for this URL.");
+            showMessageBox(
+              "No archived version found in Wayback Machine for this URL."
+            );
             return;
           }
         } catch (error) {
           console.error("Wayback Machine error:", error);
           if (error.name === "AbortError") {
-            showMessageBox("Request timed out. The archive service might be slow.");
+            showMessageBox(
+              "Request timed out. The archive service might be slow."
+            );
           } else if (error.message && error.message.includes("HTTP 429")) {
             showMessageBox("Rate limited. Please try again in a minute.");
           } else {
-            showMessageBox("Wayback Machine service unavailable. Try Archive.Today instead.");
+            showMessageBox(
+              "Wayback Machine service unavailable. Try Archive.Today instead."
+            );
           }
           return;
         }
@@ -384,14 +439,18 @@ document.addEventListener("DOMContentLoaded", () => {
         await saveToHistory(
           title,
           url,
-          selRadio.value === "archiveToday" ? "Archive.Today" : "Wayback Machine",
+          selRadio.value === "archiveToday"
+            ? "Archive.Today"
+            : "Wayback Machine",
           archiveUrl
         );
         chrome.tabs.create({ url: archiveUrl });
       }
     } catch (err) {
       console.error("Archive error:", err);
-      showMessageBox("Service unavailable. Please try again or use the other archive option.");
+      showMessageBox(
+        "Service unavailable. Please try again or use the other archive option."
+      );
     } finally {
       document.body.classList.remove("busy");
       archiveBtn.disabled = false;

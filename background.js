@@ -6,7 +6,9 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "archiveTodayPrecheck") {
     precheckArchiveToday(msg.url, msg.timeoutMs || 1000) // tighter timeout
       .then(sendResponse)
-      .catch(err => sendResponse({ ok: false, error: err?.message || String(err) }));
+      .catch((err) =>
+        sendResponse({ ok: false, error: err?.message || String(err) })
+      );
     return true; // async
   }
 });
@@ -25,7 +27,7 @@ async function precheckArchiveToday(targetUrl, timeoutMs) {
       redirect: "follow",
       cache: "no-store",
       credentials: "omit",
-      headers: { Accept: "text/html" }
+      headers: { Accept: "text/html" },
     });
 
     const finalUrl = resp.url || checkedUrl;
@@ -37,11 +39,18 @@ async function precheckArchiveToday(targetUrl, timeoutMs) {
     // Still on /newest/ — peek at a small slice for "No results"
     const head = await readFirstText(resp, 4096); // smaller sniff
     if (NO_RESULTS_RE.test(head)) {
-      return { ok: true, hasSnapshot: false, reason: "no-results", checkedUrl, finalUrl };
+      return {
+        ok: true,
+        hasSnapshot: false,
+        reason: "no-results",
+        checkedUrl,
+        finalUrl,
+      };
     }
     return { ok: true, hasSnapshot: true, checkedUrl, finalUrl };
   } catch (err) {
-    if (err?.name === "AbortError") return { ok: false, error: "ARCHIVE_TODAY_TIMEOUT" };
+    if (err?.name === "AbortError")
+      return { ok: false, error: "ARCHIVE_TODAY_TIMEOUT" };
     return { ok: false, error: "NETWORK_ERROR" };
   } finally {
     clearTimeout(timer);
@@ -53,7 +62,8 @@ async function readFirstText(resp, maxBytes = 4096) {
   if (!resp.body) return "";
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
-  let out = "", read = 0;
+  let out = "",
+    read = 0;
   try {
     while (true) {
       const { done, value } = await reader.read();
@@ -64,6 +74,8 @@ async function readFirstText(resp, maxBytes = 4096) {
     }
     out += decoder.decode();
   } catch {}
-  try { reader.cancel(); } catch {}
+  try {
+    reader.cancel();
+  } catch {}
   return out;
 }
