@@ -19,7 +19,7 @@
 
 ## 📸 Popup Interface Preview
 
-<img src="screenshot.png" alt="Screenshot of ByeWall popup" width="250">
+<img src="screenshotnew.png" alt="Screenshot of ByeWall popup" width="250">
 
 ## 🔧 How to Install
 
