@@ -49,8 +49,7 @@
 
 - **Reliable service status**  
   Real-time health checks for Archive.today and Wayback Machine now go beyond just “online.”  
-  They detect broken states (like blank pages), show clear green/red indicators with tooltips,  
-  and use a 5-minute cache to reduce API load while staying accurate.  
+  They detect broken states (like blank pages), show clear green/red indicators with tooltips, and use a 5-minute cache to reduce API load while staying accurate.  
 
 - **Streamlined keyboard shortcuts**  
   - `Ctrl+Shift+D` (`Cmd+Shift+D` on Mac): Open the extension  
