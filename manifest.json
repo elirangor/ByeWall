@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ByeWall",
-  "version": "1.7.6",
+  "version": "1.8.1",
   "description": "Bypass paywalls quickly by accessing archived versions via Archive.today or Wayback Machine. View recently archived articles in a clean interface.",
   "action": {
     "default_title": "ByeWall",
@@ -17,6 +17,22 @@
     "https://web.archive.org/*",
     "https://archive.org/*"
   ],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "Command+Shift+F"
+      },
+      "description": "Open ByeWall extension"
+    },
+    "archive_current_page": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+V",
+        "mac": "Command+Shift+V"
+      },
+      "description": "Archive current page directly"
+    }
+  },
   "icons": {
     "16": "icon.png",
     "32": "icon.png",

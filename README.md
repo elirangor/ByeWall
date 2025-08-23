@@ -14,6 +14,8 @@
 - RTL language support - proper display for right-to-left languages
 - Dark mode support - toggle between light and dark themes 
 - **Smart fallback mechanism** - tries Archive.today even if pre-check times out
+- **Reliable service status** — real-time health checks for Archive.today and Wayback Machine
+- **Streamlined keyboard shortcuts**  
 
 ## 📸 Popup Interface Preview
 
@@ -42,6 +44,20 @@
 - Secure external link handling
 
 ---
+
+## ✨ Recent Improvements (v1.8.x)
+
+- **Reliable service status**  
+  Real-time health checks for Archive.today and Wayback Machine now go beyond just “online.”  
+  They detect broken states (like blank pages), show clear green/red indicators with tooltips,  
+  and use a 5-minute cache to reduce API load while staying accurate.  
+
+- **Streamlined keyboard shortcuts**  
+  - `Ctrl+Shift+D` (`Cmd+Shift+D` on Mac): Open the extension  
+  - `Ctrl+Shift+V` (`Cmd+Shift+D` on Mac): Instantly open the current page with your preferred service  
+
+
+
 
 ## ✨ Recent Improvements (v1.7.x)
 

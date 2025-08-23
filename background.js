@@ -13,6 +13,131 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 });
 
+// Handle keyboard shortcuts
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "archive_current_page") {
+    try {
+      // Get current active tab
+      const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tabs || !tabs[0]) return;
+      
+      const currentTab = tabs[0];
+      const url = currentTab.url;
+      
+      // Check if URL is valid and supported
+      if (!isValidUrl(url) || isUnsupportedUrl(url)) {
+        console.log("Cannot archive this type of page:", url);
+        return;
+      }
+      
+      // Get user's preferred archive service (default to Archive.today)
+      const { selectedArchiveServicePref = "archiveToday" } = 
+        await chrome.storage.local.get("selectedArchiveServicePref");
+      
+      let archiveUrl;
+      if (selectedArchiveServicePref === "archiveToday") {
+        archiveUrl = `https://archive.today/newest/${url}`;
+      } else {
+        // For Wayback, use a simpler direct approach for keyboard shortcut
+        archiveUrl = `https://web.archive.org/web/*/${url}`;
+      }
+      
+      // Open archived version in new tab
+      await chrome.tabs.create({ url: archiveUrl });
+      
+      // Save to history
+      const title = currentTab.title || url;
+      const serviceName = selectedArchiveServicePref === "archiveToday" ? "Archive.Today" : "Wayback Machine";
+      await saveToHistory(title, url, serviceName, archiveUrl);
+      
+    } catch (error) {
+      console.error("Keyboard shortcut archive error:", error);
+    }
+  }
+});
+
+// Helper functions for keyboard shortcut
+function isValidUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function isUnsupportedUrl(url) {
+  const unsupported = [
+    "chrome://",
+    "chrome-extension://",
+    "edge://", 
+    "edge-extension://",
+    "about:",
+    "file://",
+    "moz-extension://",
+    "opera://",
+  ];
+  return unsupported.some((p) => url.startsWith(p));
+}
+
+function normalizeHistoryUrl(raw) {
+  try {
+    const u = new URL(raw);
+    u.hash = "";
+    u.hostname = u.hostname.toLowerCase();
+
+    // drop common trackers
+    const drop = [
+      "utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content",
+      "utm_id", "gclid", "fbclid", "mc_cid", "mc_eid",
+    ];
+    drop.forEach((k) => u.searchParams.delete(k));
+    const qs = u.searchParams.toString();
+    u.search = qs ? "?" + qs : "";
+
+    // tidy path (keep "/" for root)
+    const clean = u.pathname.replace(/\/+$/, "");
+    u.pathname = clean || "/";
+
+    // remove default ports
+    if (
+      (u.protocol === "https:" && u.port === "443") ||
+      (u.protocol === "http:" && u.port === "80")
+    )
+      u.port = "";
+
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
+async function saveToHistory(title, url, service, archiveUrl) {
+  try {
+    const norm = normalizeHistoryUrl(url);
+    const { archiveHistory = [] } = await chrome.storage.local.get("archiveHistory");
+
+    // Remove older entries for the same normalized URL
+    const filtered = archiveHistory.filter(
+      (it) => (it.normUrl || normalizeHistoryUrl(it.url)) !== norm
+    );
+
+    // Add fresh entry at the top
+    filtered.unshift({
+      title,
+      url,
+      normUrl: norm,
+      service,
+      archiveUrl,
+      timestamp: Date.now(),
+    });
+
+    await chrome.storage.local.set({ archiveHistory: filtered.slice(0, 5) });
+  } catch (error) {
+    console.error("Error saving to history:", error);
+  }
+}
+
 async function precheckArchiveToday(targetUrl, timeoutMs) {
   if (!/^https?:\/\//i.test(targetUrl))
     return { ok: true, hasSnapshot: false, reason: "unsupported" };

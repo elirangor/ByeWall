@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.7.6 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
+/* popup.js – ByeWall v1.8.1 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
 /* eslint-env browser, webextensions */
 
 /* ============================================================================
@@ -101,7 +101,85 @@ function normalizeHistoryUrl(raw) {
 }
 
 /* ============================================================================
- * 2) Archive.today quick pre-check via background (message-based)
+ * 2) Service Status Monitoring (reusing existing proven logic)
+ * ==========================================================================*/
+async function checkServiceStatus(service) {
+  try {
+    if (service === 'archiveToday') {
+      // Use the same logic as your existing precheck - tests actual functionality
+      const result = await hasArchiveTodaySnapshotQuick('https://google.com', 3000);
+      // If it can check google.com (regardless of snapshot exists), service is up
+      return true;
+    } else if (service === 'wayback') {
+      // Test the actual Wayback API your extension uses
+      const testUrl = await getLatestWaybackSnapshot('https://google.com');
+      // If API responds (even with no snapshot), service is up
+      return true;
+    }
+    return false;
+  } catch (error) {
+    // If the actual service functions fail, service is down or broken
+    console.log(`${service} status check failed:`, error.message);
+    return false;
+  }
+}
+
+function updateStatusDot(service, isOnline) {
+  const dot = document.getElementById(`${service}Status`);
+  const tooltip = document.getElementById(`${service}Tooltip`);
+  if (!dot || !tooltip) return;
+  
+  dot.className = `status-dot ${isOnline ? 'online' : 'offline'}`;
+  
+  const serviceName = service === 'archiveToday' ? 'Archive.Today' : 'Wayback Machine';
+  
+  if (isOnline) {
+    tooltip.textContent = `🟢 ${serviceName} is working normally`;
+  } else {
+    tooltip.textContent = `🔴 ${serviceName} appears to be down or broken`;
+  }
+}
+
+async function checkAllServicesStatus() {
+  // Check both services in parallel
+  const [archiveTodayStatus, waybackStatus] = await Promise.all([
+    checkServiceStatus('archiveToday'),
+    checkServiceStatus('wayback')
+  ]);
+  
+  updateStatusDot('archiveToday', archiveTodayStatus);
+  updateStatusDot('wayback', waybackStatus);
+  
+  // Cache the results with timestamp
+  const statusData = {
+    archiveToday: archiveTodayStatus,
+    wayback: waybackStatus,
+    lastChecked: Date.now()
+  };
+  
+  await setStorage('serviceStatus', statusData);
+}
+
+async function loadCachedStatus() {
+  const { serviceStatus } = await getStorage('serviceStatus');
+  
+  if (serviceStatus) {
+    const { archiveToday, wayback, lastChecked } = serviceStatus;
+    const fiveMinutes = 5 * 60 * 1000;
+    
+    // Use cached status if less than 5 minutes old
+    if (Date.now() - lastChecked < fiveMinutes) {
+      updateStatusDot('archiveToday', archiveToday);
+      updateStatusDot('wayback', wayback);
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/* ============================================================================
+ * 3) Archive.today quick pre-check via background (message-based)
  * ==========================================================================*/
 function hasArchiveTodaySnapshotQuick(url, timeoutMs = 1000) {
   return new Promise((resolve, reject) => {
@@ -121,7 +199,7 @@ function hasArchiveTodaySnapshotQuick(url, timeoutMs = 1000) {
 }
 
 /* ============================================================================
- * 3) History (dedup on save, keep newest only)
+ * 4) History (dedup on save, keep newest only)
  * ==========================================================================*/
 async function saveToHistory(title, url, service, archiveUrl) {
   const norm = normalizeHistoryUrl(url);
@@ -227,7 +305,7 @@ async function loadHistory() {
 }
 
 /* ============================================================================
- * 4) Wayback helper
+ * 5) Wayback helper
  * ==========================================================================*/
 async function getLatestWaybackSnapshot(url) {
   const ctrl = new AbortController();
@@ -272,7 +350,7 @@ async function getLatestWaybackSnapshot(url) {
 }
 
 /* ============================================================================
- * 5) Main
+ * 6) Main
  * ==========================================================================*/
 let warmPrecheckPromise = null;
 let warmPrecheckUrl = null;
@@ -293,7 +371,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2) Load history (dedup happens inside)
   loadHistory();
 
-  // 3) Restore selected service
+  // 3) Initialize service status monitoring (after functions are defined)
+  (async () => {
+    // Try to load cached status first (show immediately)
+    const hasCachedStatus = await loadCachedStatus();
+    
+    // Always do a fresh check in the background, but don't block UI
+    checkAllServicesStatus().catch(console.error);
+  })();
+
+  // 4) Restore selected service
   getStorage("selectedArchiveServicePref").then(
     ({ selectedArchiveServicePref = "archiveToday" }) => {
       const radio = document.getElementById(
@@ -303,14 +390,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  // 4) Remember preference
+  // 5) Remember preference
   document.querySelectorAll('input[name="archiveService"]').forEach((r) => {
     r.addEventListener("change", () =>
       setStorage("selectedArchiveServicePref", r.value)
     );
   });
 
-  // 5) Dark mode toggle (mirror to localStorage to prevent next-open flash)
+  // 6) Dark mode toggle (mirror to localStorage to prevent next-open flash)
   (async () => {
     const { darkModeEnabled } = await getStorage("darkModeEnabled");
     const toggle = document.getElementById("darkModeToggle");
@@ -330,7 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 6) Warm the Archive.today pre-check on open
+  // 7) Warm the Archive.today pre-check on open
   (async () => {
     const { url } = await getCurrentTabInfo();
     if (isValidUrl(url) && !isUnsupportedUrl(url)) {
@@ -341,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 7) Archive button with fallback mechanism
+  // 8) Archive button with fallback mechanism
   const archiveBtn = document.getElementById("archive");
   let lastRequest = 0;
   const MIN_REQUEST_INTERVAL = 2000;
@@ -462,7 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ============================================================================
- * 6) Overlay style (dark-friendly)
+ * 7) Overlay style (dark-friendly)
  * ==========================================================================*/
 const style = document.createElement("style");
 style.textContent = `

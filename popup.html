@@ -70,6 +70,89 @@
       margin-bottom: 0;
     }
 
+    /* -------- Status Dots -------- */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-left: auto;
+      margin-right: 4px;
+      transition: all 0.3s;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .status-dot.online {
+      background-color: #28a745;
+      box-shadow: 0 0 6px rgba(40, 167, 69, 0.6);
+    }
+
+    .status-dot.offline {
+      background-color: #dc3545;
+      box-shadow: 0 0 6px rgba(220, 53, 69, 0.6);
+    }
+
+    /* Default gray state while loading */
+    .status-dot {
+      background-color: #6c757d;
+      box-shadow: 0 0 4px rgba(108, 117, 125, 0.4);
+    }
+
+    /* Dark mode status dots */
+    .dark-mode .status-dot.online {
+      background-color: #20c997;
+      box-shadow: 0 0 6px rgba(32, 201, 151, 0.6);
+    }
+
+    .dark-mode .status-dot.offline {
+      background-color: #e74c3c;
+      box-shadow: 0 0 6px rgba(231, 76, 60, 0.6);
+    }
+
+    /* -------- Status Dot Tooltips -------- */
+    .status-tooltip {
+      position: absolute;
+      background: #333;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      z-index: 1000;
+      bottom: 20px;
+      right: -8px;
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .status-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 20px;
+      border: 4px solid transparent;
+      border-top-color: #333;
+    }
+
+    .status-dot:hover .status-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Dark mode tooltip */
+    .dark-mode .status-tooltip {
+      background: #2d3748;
+      color: #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .dark-mode .status-tooltip::after {
+      border-top-color: #2d3748;
+    }
+
     /* -------- Custom radios: clearer states -------- */
     input[type="radio"] {
       -webkit-appearance: none;
@@ -400,10 +483,16 @@
     <label>
       <input type="radio" id="archiveTodayRadio" name="archiveService" value="archiveToday" checked />
       Archive.Today
+      <div class="status-dot" id="archiveTodayStatus">
+        <div class="status-tooltip" id="archiveTodayTooltip">Checking service status...</div>
+      </div>
     </label>
     <label>
       <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
       Wayback Machine
+      <div class="status-dot" id="waybackStatus">
+        <div class="status-tooltip" id="waybackTooltip">Checking service status...</div>
+      </div>
     </label>
   </div>
 
