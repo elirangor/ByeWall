@@ -14,6 +14,8 @@
 - RTL language support - proper display for right-to-left languages
 - Dark mode support - toggle between light and dark themes 
 - **Smart fallback mechanism** - tries Archive.today even if pre-check times out
+- **Streamlined keyboard shortcuts**
+
 
 ## 📸 Popup Interface Preview
 
@@ -42,6 +44,12 @@
 - Secure external link handling
 
 ---
+
+## ✨ Recent Improvements (v1.8)
+
+- **Streamlined keyboard shortcuts**  
+  - `Ctrl+Shift+E` (`Cmd+Shift+E` on Mac): Open the extension  
+  - `Ctrl+Shift+U` (`Cmd+Shift+U` on Mac): Instantly open the current page with your preferred service  
 
 ## ✨ Recent Improvements (v1.7.x)
 
