@@ -1,4 +1,4 @@
-/* popup.js – ByeWall v1.7.6 (CSP-safe, faster pre-check, deduped history, fallback mechanism) */
+/* popup.js – ByeWall (delegates to background, shows pending messages, warms prechecks) */
 /* eslint-env browser, webextensions */
 
 /* ============================================================================
@@ -19,29 +19,6 @@ function getCurrentTabInfo() {
       resolve({ url: t.url || "", title: t.title || "" });
     });
   });
-}
-
-function isValidUrl(url) {
-  try {
-    const u = new URL(url);
-    return u.protocol === "http:" || u.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
-function isUnsupportedUrl(url) {
-  const unsupported = [
-    "chrome://",
-    "chrome-extension://",
-    "edge://",
-    "edge-extension://",
-    "about:",
-    "file://",
-    "moz-extension://",
-    "opera://",
-  ];
-  return unsupported.some((p) => url.startsWith(p));
 }
 
 const debounce = (fn, wait) => {
@@ -101,9 +78,9 @@ function normalizeHistoryUrl(raw) {
 }
 
 /* ============================================================================
- * 2) Archive.today quick pre-check via background (message-based)
+ * 2) Archive.today quick precheck via background (optional warm-up)
  * ==========================================================================*/
-function hasArchiveTodaySnapshotQuick(url, timeoutMs = 1000) {
+function hasArchiveTodaySnapshotQuick(url, timeoutMs) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(
       { type: "archiveTodayPrecheck", url, timeoutMs },
@@ -120,32 +97,24 @@ function hasArchiveTodaySnapshotQuick(url, timeoutMs = 1000) {
   });
 }
 
-/* ============================================================================
- * 3) History (dedup on save, keep newest only)
- * ==========================================================================*/
-async function saveToHistory(title, url, service, archiveUrl) {
-  const norm = normalizeHistoryUrl(url);
-  const { archiveHistory = [] } = await getStorage("archiveHistory");
-
-  // Remove older entries for the same normalized URL
-  const filtered = archiveHistory.filter(
-    (it) => (it.normUrl || normalizeHistoryUrl(it.url)) !== norm
-  );
-
-  // Add fresh entry at the top
-  filtered.unshift({
-    title,
-    url,
-    normUrl: norm,
-    service,
-    archiveUrl,
-    timestamp: Date.now(),
+/* Wayback quick precheck (via background) */
+function hasWaybackSnapshotQuick(url, timeoutMs) {
+  return new Promise((resolve) => {
+    chrome.runtime.sendMessage(
+      { type: "waybackPrecheck", url, timeoutMs },
+      (res) => {
+        if (chrome.runtime.lastError || !res || res.ok === false) {
+          return resolve(null); // treat as unknown
+        }
+        resolve(res.hasSnapshot);
+      }
+    );
   });
-
-  await setStorage("archiveHistory", filtered.slice(0, 5));
-  loadHistory();
 }
 
+/* ============================================================================
+ * 3) History (render only; background saves)
+ * ==========================================================================*/
 async function loadHistory() {
   const { archiveHistory = [] } = await getStorage("archiveHistory");
 
@@ -227,48 +196,35 @@ async function loadHistory() {
 }
 
 /* ============================================================================
- * 4) Wayback helper
+ * 4) Pending message support (background opens popup after shortcut fail)
  * ==========================================================================*/
-async function getLatestWaybackSnapshot(url) {
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 15000);
-
-  try {
-    const cdxUrl = `https://web.archive.org/cdx/search/cdx?url=${encodeURIComponent(
-      url
-    )}&limit=1&sort=reverse`;
-    const cdxResp = await fetch(cdxUrl, {
-      signal: ctrl.signal,
-      headers: { Accept: "text/plain" },
-    });
-    if (cdxResp.ok) {
-      const text = (await cdxResp.text()).trim();
-      const line = text.split("\n")[0] || "";
-      const parts = line.split(" ");
-      if (parts.length >= 2) {
-        const ts = parts[1];
-        clearTimeout(timer);
-        return `https://web.archive.org/web/${ts}/${url}`;
-      }
-    }
-
-    const availUrl = `https://archive.org/wayback/available?url=${encodeURIComponent(
-      url
-    )}`;
-    const availResp = await fetch(availUrl, {
-      signal: ctrl.signal,
-      headers: { Accept: "application/json" },
-    });
-    clearTimeout(timer);
-    if (!availResp.ok) throw new Error(`HTTP ${availResp.status}`);
-
-    const data = await availResp.json();
-    const snapshot = data.archived_snapshots && data.archived_snapshots.closest;
-    return snapshot && snapshot.available ? snapshot.url : null;
-  } catch (err) {
-    clearTimeout(timer);
-    throw err;
+function messageFromErrorCode(code) {
+  switch (code) {
+    case "INVALID_URL":
+      return "Invalid URL detected.";
+    case "UNSUPPORTED_URL":
+      return "Cannot archive this type of page.";
+    case "NO_SNAPSHOT_ARCHIVE_TODAY":
+      return "No snapshot available on Archive.Today for this URL.";
+    case "NO_SNAPSHOT_WAYBACK":
+      return "No archived version found in Wayback Machine for this URL.";
+    case "WAYBACK_TIMEOUT":
+      return "Request timed out. The archive service might be slow.";
+    default:
+      return "Service unavailable. Please try again or use the other archive option.";
   }
+}
+
+async function showPendingMessageIfAny() {
+  const { byewallPendingMessage } = await getStorage("byewallPendingMessage");
+  if (!byewallPendingMessage) return;
+
+  const { code, time } = byewallPendingMessage;
+  if (typeof time === "number" && Date.now() - time < 30_000) {
+    const msg = messageFromErrorCode(code);
+    showMessageBox(msg);
+  }
+  await setStorage("byewallPendingMessage", null);
 }
 
 /* ============================================================================
@@ -290,8 +246,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (box) box.style.display = "none";
     });
 
-  // 2) Load history (dedup happens inside)
+  // 2) Load history (render only)
   loadHistory();
+
+  // 2.5) If background opened the popup due to a failed shortcut action, show its message
+  showPendingMessageIfAny();
 
   // 3) Restore selected service
   getStorage("selectedArchiveServicePref").then(
@@ -330,133 +289,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 6) Warm the Archive.today pre-check on open
+  // 6) Warm the pre-check on open for the selected service (shorter defaults)
   (async () => {
     const { url } = await getCurrentTabInfo();
-    if (isValidUrl(url) && !isUnsupportedUrl(url)) {
+    const { selectedArchiveServicePref = "archiveToday" } =
+      await getStorage("selectedArchiveServicePref");
+    try {
       warmPrecheckUrl = url;
-      warmPrecheckPromise = hasArchiveTodaySnapshotQuick(url, 1000).catch(
-        () => null
-      );
+      if (selectedArchiveServicePref === "archiveToday") {
+        warmPrecheckPromise = hasArchiveTodaySnapshotQuick(url).catch(
+          () => null
+        );
+      } else {
+        warmPrecheckPromise = hasWaybackSnapshotQuick(url).catch(() => null);
+      }
+    } catch {
+      warmPrecheckPromise = null;
     }
   })();
 
-  // 7) Archive button with fallback mechanism
+  // 7) Archive button -> delegate to background (shared logic)
   const archiveBtn = document.getElementById("archive");
-  let lastRequest = 0;
-  const MIN_REQUEST_INTERVAL = 2000;
-
   const doArchive = debounce(async () => {
-    const selRadio = document.querySelector(
-      'input[name="archiveService"]:checked'
-    );
-    if (!selRadio) return showMessageBox("Please select an archive service.");
-
-    const now = Date.now();
-    if (now - lastRequest < MIN_REQUEST_INTERVAL) {
-      showMessageBox("Please wait before trying again.");
-      return;
-    }
-    lastRequest = now;
-
-    const originalLabel = archiveBtn.textContent;
+    const original = archiveBtn.textContent;
     archiveBtn.disabled = true;
-    archiveBtn.textContent = "Searching…";
+    archiveBtn.textContent = "Opening…";
     document.body.classList.add("busy");
 
     try {
-      const { url, title } = await getCurrentTabInfo();
-      if (!isValidUrl(url)) return showMessageBox("Invalid URL detected.");
-      if (isUnsupportedUrl(url))
-        return showMessageBox("Cannot archive this type of page.");
-
-      let archiveUrl = null;
-
-      if (selRadio.value === "archiveToday") {
-        let shouldTryAnyway = false;
-
-        try {
-          let hasSnapshot;
-          if (warmPrecheckPromise && warmPrecheckUrl === url) {
-            hasSnapshot = await warmPrecheckPromise;
-            if (hasSnapshot === null) {
-              hasSnapshot = await hasArchiveTodaySnapshotQuick(url, 1000);
-            }
-          } else {
-            hasSnapshot = await hasArchiveTodaySnapshotQuick(url, 1000);
-          }
-
-          if (!hasSnapshot) {
-            showMessageBox("No snapshot available for this site.");
-            return;
-          }
-        } catch (e) {
-          // Only log unexpected errors, not timeouts (which are handled gracefully)
-          if (e.message !== "ARCHIVE_TODAY_TIMEOUT") {
-            console.error("Archive.today pre-check error:", e);
-          }
-          // Instead of showing error, we'll try anyway
-          shouldTryAnyway = true;
-        }
-
-        // Always proceed to open the archive URL, either because:
-        // 1. Pre-check succeeded and found a snapshot, OR
-        // 2. Pre-check failed but we're trying anyway (fallback)
-        archiveUrl = `https://archive.today/newest/${url}`;
-
-        if (shouldTryAnyway) {
-          // Update button text to indicate we're trying despite the pre-check failure
-          archiveBtn.textContent = "Trying anyway…";
-        }
-      } else {
-        // Wayback Machine
-        try {
-          archiveUrl = await getLatestWaybackSnapshot(url);
-          if (!archiveUrl) {
-            showMessageBox(
-              "No archived version found in Wayback Machine for this URL."
-            );
-            return;
-          }
-        } catch (error) {
-          console.error("Wayback Machine error:", error);
-          if (error.name === "AbortError") {
-            showMessageBox(
-              "Request timed out. The archive service might be slow."
-            );
-          } else if (error.message && error.message.includes("HTTP 429")) {
-            showMessageBox("Rate limited. Please try again in a minute.");
-          } else {
-            showMessageBox(
-              "Wayback Machine service unavailable. Try Archive.Today instead."
-            );
-          }
-          return;
-        }
-      }
-
-      if (archiveUrl) {
-        await saveToHistory(
-          title,
-          url,
-          selRadio.value === "archiveToday"
-            ? "Archive.Today"
-            : "Wayback Machine",
-          archiveUrl
-        );
-        chrome.tabs.create({ url: archiveUrl });
-      }
-    } catch (err) {
-      console.error("Archive error:", err);
-      showMessageBox(
-        "Service unavailable. Please try again or use the other archive option."
+      const res = await new Promise((resolve) =>
+        chrome.runtime.sendMessage({ type: "performArchive" }, resolve)
       );
+
+      if (!res || res.ok === false) {
+        showMessageBox(messageFromErrorCode(res?.error));
+        return;
+      }
+
+      // Background already saved to history & opened new tab; refresh list.
+      await loadHistory();
     } finally {
       document.body.classList.remove("busy");
       archiveBtn.disabled = false;
-      archiveBtn.textContent = originalLabel;
+      archiveBtn.textContent = original;
     }
-  }, 100);
+  }, 50);
 
   if (archiveBtn) archiveBtn.addEventListener("click", doArchive);
 });
