@@ -53,6 +53,7 @@ function normalizeHistoryUrl(raw) {
       "fbclid",
       "mc_cid",
       "mc_eid",
+      "gift",
     ].forEach((k) => u.searchParams.delete(k));
     const qs = u.searchParams.toString();
     u.search = qs ? "?" + qs : "";
