@@ -8,7 +8,7 @@
 - Choose between Archive.today or Wayback Machine
 - Track your last 5 archived pages
 - Dark mode support
-- Keyboard shortcuts: `Ctrl+Shift+E` (open popup), `Ctrl+Shift+U` (instant archive)
+- Keyboard shortcuts: `Ctrl+Shift+E` (open popup), `Ctrl+Shift+U` (instant open of latest snapshot)
 - Smart fallback when services are slow
 
 <img src="screenshot.png" alt="ByeWall popup interface" width="250">
