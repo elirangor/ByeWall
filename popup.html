@@ -70,7 +70,6 @@
       margin-bottom: 0;
     }
 
-    /* -------- Custom radios: clearer states -------- */
     input[type="radio"] {
       -webkit-appearance: none;
       appearance: none;
@@ -79,7 +78,6 @@
       margin-right: 10px;
       border-radius: 50%;
       border: 2px solid #cfd4da;
-      /* light gray ring when NOT checked */
       background: #fff;
       display: inline-grid;
       place-content: center;
@@ -93,20 +91,16 @@
       height: 8px;
       border-radius: 50%;
       transform: scale(0);
-      /* hidden when NOT checked */
       transition: transform .15s ease;
       background: #0d6efd;
-      /* checked dot color (blue) */
     }
 
     input[type="radio"]:checked {
       border-color: #0d6efd;
-      /* ring matches the dot when checked */
     }
 
     input[type="radio"]:checked::before {
       transform: scale(1);
-      /* show dot when checked */
     }
 
     input[type="radio"]:focus-visible {
@@ -114,7 +108,6 @@
       outline-offset: 2px;
     }
 
-    /* Dark mode tweaks */
     .dark-mode input[type="radio"] {
       border-color: #6c757d;
       background: #2b2f36;
@@ -175,7 +168,19 @@
       text-decoration: underline;
     }
 
-    /* Message Box */
+    .shortcut-hint {
+      margin: 10px 0 0 0;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #495057;
+      text-align: center;
+      transition: color 0.3s;
+    }
+
+    .dark-mode .shortcut-hint {
+      color: #a0a0a0;
+    }
+
     .message-box {
       display: none;
       position: fixed;
@@ -219,7 +224,6 @@
       background: #0056b3;
     }
 
-    /* Dark Mode */
     .dark-mode {
       background-color: #26292e;
       color: #e0e0e0;
@@ -322,7 +326,6 @@
       transform: translateX(20px);
     }
 
-    /* History */
     .history-item {
       background: #fff;
       border: 1px solid #e9ecef;
@@ -407,17 +410,22 @@
     </label>
   </div>
 
+  <button id="archive">Read Behind the Wall</button>
+
   <div id="history-section" style="margin-top: 12px; display: none;">
     <h4>Recently Archived</h4>
     <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;"></ul>
-  </div>
 
-  <button id="archive">Read Behind the Wall</button>
+    <p class="shortcut-hint">
+      ⌨️ Ctrl+Shift+E (⌘+Shift+E) - Launch ByeWall <br>
+      ⌨️ Ctrl+Shift+U (⌘+Shift+U) - Open latest snapshot
+    </p>
 
-  <div class="credit">
-    Just a little something from
-    <a href="https://www.linkedin.com/in/elirang/" target="_blank" rel="noopener noreferrer">Eliran</a> |
-    <a href="https://github.com/elirangor/ByeWall" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+    <div class="credit">
+      Just a little something from
+      <a href="https://www.linkedin.com/in/elirang/" target="_blank" rel="noopener noreferrer">Eliran</a> |
+      <a href="https://github.com/elirangor/ByeWall" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+    </div>
   </div>
 
   <div id="messageBox" class="message-box">
