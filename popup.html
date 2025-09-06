@@ -385,6 +385,39 @@
     .dark-mode .history-item-content .details {
       color: #a0a0a0;
     }
+
+    /* New tab behavior section styles */
+    .tab-behavior-section {
+      background: white;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #e9ecef;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .tab-toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tab-toggle-label {
+      font-size: 13px;
+      color: #495057;
+      margin: 0;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .dark-mode .tab-behavior-section {
+      background: #31363d;
+      border-color: #444c56;
+    }
+
+    .dark-mode .tab-toggle-label {
+      color: #e0e0e0;
+    }
   </style>
 </head>
 
@@ -408,6 +441,19 @@
       <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
       Wayback Machine
     </label>
+  </div>
+
+  <!-- New tab behavior section -->
+  <div class="tab-behavior-section">
+    <div class="tab-toggle-container">
+      <label class="tab-toggle-label" for="tabBehaviorToggle">
+        Open in new tab
+      </label>
+      <label class="toggle-switch">
+        <input type="checkbox" id="tabBehaviorToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
   </div>
 
   <button id="archive">Read Behind the Wall</button>

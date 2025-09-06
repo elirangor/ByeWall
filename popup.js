@@ -55,6 +55,7 @@ function normalizeHistoryUrl(raw) {
       "fbclid",
       "mc_cid",
       "mc_eid",
+      "gift", // Added gift parameter for news sites
     ];
     drop.forEach((k) => u.searchParams.delete(k));
     const qs = u.searchParams.toString();
@@ -269,7 +270,20 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-  // 5) Dark mode toggle (mirror to localStorage to prevent next-open flash)
+  // 5) Tab behavior toggle - restore and save preference
+  (async () => {
+    const { openInNewTab = true } = await getStorage("openInNewTab");
+    const tabToggle = document.getElementById("tabBehaviorToggle");
+
+    if (tabToggle) {
+      tabToggle.checked = openInNewTab;
+      tabToggle.addEventListener("change", () => {
+        setStorage("openInNewTab", tabToggle.checked);
+      });
+    }
+  })();
+
+  // 6) Dark mode toggle (mirror to localStorage to prevent next-open flash)
   (async () => {
     const { darkModeEnabled } = await getStorage("darkModeEnabled");
     const toggle = document.getElementById("darkModeToggle");
@@ -289,11 +303,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 6) Warm the pre-check on open for the selected service (shorter defaults)
+  // 7) Warm the pre-check on open for the selected service (shorter defaults)
   (async () => {
     const { url } = await getCurrentTabInfo();
-    const { selectedArchiveServicePref = "archiveToday" } =
-      await getStorage("selectedArchiveServicePref");
+    const { selectedArchiveServicePref = "archiveToday" } = await getStorage(
+      "selectedArchiveServicePref"
+    );
     try {
       warmPrecheckUrl = url;
       if (selectedArchiveServicePref === "archiveToday") {
@@ -308,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   })();
 
-  // 7) Archive button -> delegate to background (shared logic)
+  // 8) Archive button -> delegate to background (shared logic)
   const archiveBtn = document.getElementById("archive");
   const doArchive = debounce(async () => {
     const original = archiveBtn.textContent;
@@ -326,8 +341,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Background already saved to history & opened new tab; refresh list.
+      // Background already saved to history & opened new/same tab; refresh list.
       await loadHistory();
+
+      // If opened in same tab, close popup since user is navigating away
+      if (!res.openedInNewTab) {
+        window.close();
+      }
     } finally {
       document.body.classList.remove("busy");
       archiveBtn.disabled = false;

@@ -1,9 +1,9 @@
 // archive-core.js — shared logic for ByeWall (MV3)
 
 // -------- Tunable timeouts (ms) --------
-const AT_PRECHECK_TIMEOUT_MS = 700;   // Archive.today precheck (was 1000)
-const WB_PRECHECK_TIMEOUT_MS = 700;   // Wayback precheck (was 1000)
-const WB_FULL_TIMEOUT_MS     = 8000;  // Wayback full lookup cap (was 15000)
+const AT_PRECHECK_TIMEOUT_MS = 700; // Archive.today precheck (was 1000)
+const WB_PRECHECK_TIMEOUT_MS = 700; // Wayback precheck (was 1000)
+const WB_FULL_TIMEOUT_MS = 8000; // Wayback full lookup cap (was 15000)
 
 const NEWEST_PATH = "newest/";
 const NO_RESULTS_RE = /No results/i;
@@ -111,7 +111,10 @@ async function readFirstText(resp, maxBytes = 4096) {
   return out;
 }
 
-export async function precheckArchiveToday(targetUrl, timeoutMs = AT_PRECHECK_TIMEOUT_MS) {
+export async function precheckArchiveToday(
+  targetUrl,
+  timeoutMs = AT_PRECHECK_TIMEOUT_MS
+) {
   if (!/^https?:\/\//i.test(targetUrl))
     return { ok: true, hasSnapshot: false, reason: "unsupported" };
 
@@ -156,7 +159,10 @@ export async function precheckArchiveToday(targetUrl, timeoutMs = AT_PRECHECK_TI
 }
 
 /* ---------- Wayback quick precheck (fast) ---------- */
-export async function waybackHasSnapshotQuick(url, timeoutMs = WB_PRECHECK_TIMEOUT_MS) {
+export async function waybackHasSnapshotQuick(
+  url,
+  timeoutMs = WB_PRECHECK_TIMEOUT_MS
+) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
@@ -230,12 +236,15 @@ export async function performArchive() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = tab?.url || "";
   const title = tab?.title || "";
+  const currentTabId = tab?.id;
 
   if (!isValidUrl(url)) return { ok: false, error: "INVALID_URL" };
   if (isUnsupportedUrl(url)) return { ok: false, error: "UNSUPPORTED_URL" };
 
-  const { selectedArchiveServicePref = "archiveToday" } =
-    await getStorage("selectedArchiveServicePref");
+  const {
+    selectedArchiveServicePref = "archiveToday",
+    openInNewTab = true, // Default to new tab
+  } = await getStorage(["selectedArchiveServicePref", "openInNewTab"]);
 
   let archiveUrl = null;
 
@@ -277,6 +286,17 @@ export async function performArchive() {
     archiveUrl
   );
 
-  await chrome.tabs.create({ url: archiveUrl });
-  return { ok: true, archiveUrl };
+  // Handle tab opening based on user preference
+  if (openInNewTab) {
+    // Open in new tab adjacent to current tab
+    await chrome.tabs.create({
+      url: archiveUrl,
+      index: tab.index + 1, // This makes it open right next to current tab
+    });
+  } else {
+    // Replace current tab
+    await chrome.tabs.update(currentTabId, { url: archiveUrl });
+  }
+
+  return { ok: true, archiveUrl, openedInNewTab: openInNewTab };
 }

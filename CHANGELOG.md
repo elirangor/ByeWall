@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.8.3
+
+- **Added tab behavior control**: New toggle to choose between opening snapshots in a new tab -(default) or replacing the current tab
+- **Smart tab positioning**: When opening in new tab, the archived page opens adjacent to the current tab instead of at the end
+
 ## v1.8.2
 - **Added keyboard shortcuts section in the popup** for easier discovery and quick reference
 
