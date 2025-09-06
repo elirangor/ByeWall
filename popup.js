@@ -270,18 +270,34 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-  // 5) Tab behavior toggle - restore and save preference
-  (async () => {
-    const { openInNewTab = true } = await getStorage("openInNewTab");
-    const tabToggle = document.getElementById("tabBehaviorToggle");
+// 5) Tab behavior choice - restore and save preference
+(async () => {
+  const { openInNewTab = true } = await getStorage("openInNewTab");
+  const tabChoice = document.getElementById("tabChoice");
+  if (!tabChoice) return;
 
-    if (tabToggle) {
-      tabToggle.checked = openInNewTab;
-      tabToggle.addEventListener("change", () => {
-        setStorage("openInNewTab", tabToggle.checked);
-      });
-    }
-  })();
+  const options = tabChoice.querySelectorAll(".tab-option");
+
+  function updateActive(isNewTab) {
+    options.forEach(opt => opt.classList.remove("active"));
+    const activeOpt = tabChoice.querySelector(
+      `.tab-option[data-value="${isNewTab ? "new" : "same"}"]`
+    );
+    if (activeOpt) activeOpt.classList.add("active");
+  }
+
+  options.forEach(opt => {
+    opt.addEventListener("click", () => {
+      const isNewTab = opt.dataset.value === "new";
+      setStorage("openInNewTab", isNewTab);
+      updateActive(isNewTab);
+    });
+  });
+
+  // initialize state on load
+  updateActive(openInNewTab !== false);
+})();
+
 
   // 6) Dark mode toggle (mirror to localStorage to prevent next-open flash)
   (async () => {
@@ -354,6 +370,18 @@ document.addEventListener("DOMContentLoaded", () => {
       archiveBtn.textContent = original;
     }
   }, 50);
+
+    // 9) Platform-specific shortcut hints
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+
+  document.getElementById("shortcut1").textContent = isMac
+    ? "⌘+Shift+E"
+    : "Ctrl+Shift+E";
+
+  document.getElementById("shortcut2").textContent = isMac
+    ? "⌘+Shift+U"
+    : "Ctrl+Shift+U";
+
 
   if (archiveBtn) archiveBtn.addEventListener("click", doArchive);
 });

@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.4
+
+- **Improved tab behavior control UI**
+
 ## v1.8.3
 
 - **Added tab behavior control**: New toggle to choose between opening snapshots in a new tab -(default) or replacing the current tab

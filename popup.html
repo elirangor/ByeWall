@@ -388,13 +388,15 @@
 
     /* New tab behavior section styles */
     .tab-behavior-section {
-      background: white;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #e9ecef;
-      transition: background-color 0.3s, border-color 0.3s;
+      margin: 8px 0 12px 0;
+      /* keep some spacing */
+      padding: 0;
+      /* no extra padding */
+      border: none;
+      /* remove border */
+      background: transparent;
     }
+
 
     .tab-toggle-container {
       display: flex;
@@ -443,29 +445,99 @@
     </label>
   </div>
 
-  <!-- New tab behavior section -->
-  <div class="tab-behavior-section">
-    <div class="tab-toggle-container">
-      <label class="tab-toggle-label" for="tabBehaviorToggle">
-        Open in new tab
-      </label>
-      <label class="toggle-switch">
-        <input type="checkbox" id="tabBehaviorToggle" checked>
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
+  <style>
+    /* New tab behavior section - styled like other blocks */
+    .tab-behavior-section {
+      margin: 8px 0 12px 0;
+      /* spacing consistent with other sections */
+      padding: 0;
+      border: none;
+      background: transparent;
+    }
+
+    .tab-choice {
+      display: flex;
+      width: 100%;
+      border: 1px solid #e9ecef;
+      /* same border color as other blocks */
+      border-radius: 6px;
+      /* smooth corners */
+      overflow: hidden;
+      background: white;
+      /* matches options-section/history-item */
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .tab-option {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      cursor: pointer;
+      font-size: 13px;
+      user-select: none;
+      transition: background 0.2s, color 0.2s;
+      background: transparent;
+      color: #495057;
+      border: none;
+    }
+
+    .tab-option+.tab-option {
+      border-left: 1px solid #e9ecef;
+      /* subtle divider only in the middle */
+    }
+
+    .tab-option.active {
+      background: #0d6efd;
+      color: white;
+    }
+
+    .tab-option:not(.active):hover {
+      background: #f1f3f5;
+    }
+
+    /* Dark mode adjustments */
+    .dark-mode .tab-choice {
+      background: #31363d;
+      border-color: #444c56;
+    }
+
+    .dark-mode .tab-option {
+      color: #e0e0e0;
+    }
+
+    .dark-mode .tab-option+.tab-option {
+      border-left: 1px solid #444c56;
+    }
+
+    .dark-mode .tab-option.active {
+      background: #4a9eff;
+      color: white;
+    }
+
+    .dark-mode .tab-option:not(.active):hover {
+      background: #3e444b;
+    }
+  </style>
+
 
   <button id="archive">Read Behind the Wall</button>
 
   <div id="history-section" style="margin-top: 12px; display: none;">
-    <h4>Recently Archived</h4>
+    <h4>Recently Viewed</h4>
     <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;"></ul>
 
-    <p class="shortcut-hint">
-      ⌨️ Ctrl+Shift+E (⌘+Shift+E) - Launch ByeWall <br>
-      ⌨️ Ctrl+Shift+U (⌘+Shift+U) - Open latest snapshot
+    <div class="tab-behavior-section">
+      <div class="tab-choice" id="tabChoice">
+        <div class="tab-option" data-value="new">➕ New Tab</div>
+        <div class="tab-option" data-value="same">🔄 Same Tab</div>
+      </div>
+    </div>
+
+    <p class="shortcut-hint" id="shortcut-hint">
+      ⌨️ <span id="shortcut1"></span> - Launch ByeWall <br>
+      ⌨️ <span id="shortcut2"></span> - Open latest snapshot
     </p>
+
 
     <div class="credit">
       Just a little something from

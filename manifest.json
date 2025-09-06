@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ByeWall",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "Bypass paywalls quickly by accessing archived versions via Archive.today or Wayback Machine. View recently archived articles in a clean interface.",
   "action": {
     "default_title": "ByeWall",
