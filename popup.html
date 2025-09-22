@@ -420,32 +420,7 @@
     .dark-mode .tab-toggle-label {
       color: #e0e0e0;
     }
-  </style>
-</head>
 
-<body>
-  <div class="header-container">
-    <h3>ByeWall 📰</h3>
-    <div class="toggle-container">
-      <label class="toggle-switch">
-        <input type="checkbox" id="darkModeToggle">
-        <span class="slider"></span>
-      </label>
-    </div>
-  </div>
-
-  <div class="options-section">
-    <label>
-      <input type="radio" id="archiveTodayRadio" name="archiveService" value="archiveToday" checked />
-      Archive.Today
-    </label>
-    <label>
-      <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
-      Wayback Machine
-    </label>
-  </div>
-
-  <style>
     /* New tab behavior section - styled like other blocks */
     .tab-behavior-section {
       margin: 8px 0 12px 0;
@@ -518,32 +493,56 @@
       background: #3e444b;
     }
   </style>
+</head>
 
+<body>
+  <div class="header-container">
+    <h3>ByeWall 📰</h3>
+    <div class="toggle-container">
+      <label class="toggle-switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="options-section">
+    <label>
+      <input type="radio" id="archiveTodayRadio" name="archiveService" value="archiveToday" checked />
+      Archive.Today
+    </label>
+    <label>
+      <input type="radio" id="waybackRadio" name="archiveService" value="wayback" />
+      Wayback Machine
+    </label>
+  </div>
+
+  <!-- Tab behavior - now always visible -->
+  <div class="tab-behavior-section">
+    <div class="tab-choice" id="tabChoice">
+      <div class="tab-option" data-value="new">➕ New Tab</div>
+      <div class="tab-option" data-value="same">🔄 Same Tab</div>
+    </div>
+  </div>
 
   <button id="archive">Read Behind the Wall</button>
 
+  <!-- History section - only shows when there is history -->
   <div id="history-section" style="margin-top: 12px; display: none;">
     <h4>Recently Viewed</h4>
     <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;"></ul>
+  </div>
 
-    <div class="tab-behavior-section">
-      <div class="tab-choice" id="tabChoice">
-        <div class="tab-option" data-value="new">➕ New Tab</div>
-        <div class="tab-option" data-value="same">🔄 Same Tab</div>
-      </div>
-    </div>
+  <!-- Always visible sections -->
+  <p class="shortcut-hint" id="shortcut-hint">
+    ⌨️ <span id="shortcut1"></span> - Launch ByeWall <br>
+    ⌨️ <span id="shortcut2"></span> - Open latest snapshot
+  </p>
 
-    <p class="shortcut-hint" id="shortcut-hint">
-      ⌨️ <span id="shortcut1"></span> - Launch ByeWall <br>
-      ⌨️ <span id="shortcut2"></span> - Open latest snapshot
-    </p>
-
-
-    <div class="credit">
-      Just a little something from
-      <a href="https://www.linkedin.com/in/elirang/" target="_blank" rel="noopener noreferrer">Eliran</a> |
-      <a href="https://github.com/elirangor/ByeWall" target="_blank" rel="noopener noreferrer">View on GitHub</a>
-    </div>
+  <div class="credit">
+    Just a little something from
+    <a href="https://www.linkedin.com/in/elirang/" target="_blank" rel="noopener noreferrer">Eliran</a> |
+    <a href="https://github.com/elirangor/ByeWall" target="_blank" rel="noopener noreferrer">View on GitHub</a>
   </div>
 
   <div id="messageBox" class="message-box">
