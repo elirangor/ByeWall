@@ -386,45 +386,9 @@
       color: #a0a0a0;
     }
 
-    /* New tab behavior section styles */
+    /* Tab behavior section styles - moved to after history */
     .tab-behavior-section {
       margin: 8px 0 12px 0;
-      /* keep some spacing */
-      padding: 0;
-      /* no extra padding */
-      border: none;
-      /* remove border */
-      background: transparent;
-    }
-
-
-    .tab-toggle-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .tab-toggle-label {
-      font-size: 13px;
-      color: #495057;
-      margin: 0;
-      cursor: pointer;
-      transition: color 0.3s;
-    }
-
-    .dark-mode .tab-behavior-section {
-      background: #31363d;
-      border-color: #444c56;
-    }
-
-    .dark-mode .tab-toggle-label {
-      color: #e0e0e0;
-    }
-
-    /* New tab behavior section - styled like other blocks */
-    .tab-behavior-section {
-      margin: 8px 0 12px 0;
-      /* spacing consistent with other sections */
       padding: 0;
       border: none;
       background: transparent;
@@ -434,12 +398,9 @@
       display: flex;
       width: 100%;
       border: 1px solid #e9ecef;
-      /* same border color as other blocks */
       border-radius: 6px;
-      /* smooth corners */
       overflow: hidden;
       background: white;
-      /* matches options-section/history-item */
       transition: background-color 0.3s, border-color 0.3s;
     }
 
@@ -458,7 +419,6 @@
 
     .tab-option+.tab-option {
       border-left: 1px solid #e9ecef;
-      /* subtle divider only in the middle */
     }
 
     .tab-option.active {
@@ -470,7 +430,7 @@
       background: #f1f3f5;
     }
 
-    /* Dark mode adjustments */
+    /* Dark mode adjustments for tab behavior */
     .dark-mode .tab-choice {
       background: #31363d;
       border-color: #444c56;
@@ -517,20 +477,20 @@
     </label>
   </div>
 
-  <!-- Tab behavior - now always visible -->
-  <div class="tab-behavior-section">
-    <div class="tab-choice" id="tabChoice">
-      <div class="tab-option" data-value="new">➕ New Tab</div>
-      <div class="tab-option" data-value="same">🔄 Same Tab</div>
-    </div>
-  </div>
-
   <button id="archive">Read Behind the Wall</button>
 
   <!-- History section - only shows when there is history -->
   <div id="history-section" style="margin-top: 12px; display: none;">
     <h4>Recently Viewed</h4>
     <ul id="historyList" style="list-style-type: none; padding: 0; margin: 0;"></ul>
+  </div>
+
+  <!-- Tab behavior - moved below history section -->
+  <div class="tab-behavior-section">
+    <div class="tab-choice" id="tabChoice">
+      <div class="tab-option" data-value="new">➕ New Tab</div>
+      <div class="tab-option" data-value="same">🔄 Same Tab</div>
+    </div>
   </div>
 
   <!-- Always visible sections -->
