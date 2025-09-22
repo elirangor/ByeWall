@@ -9,9 +9,12 @@
 - Track your last 5 archived pages
 - Dark mode support
 - Keyboard shortcuts: `Ctrl+Shift+E` (open popup), `Ctrl+Shift+U` (instant open of latest snapshot)
-- Smart fallback when services are slow
+- Option of choosing whether open the article on a new tab or in the same one
 
-<img src="screenshot.png" alt="ByeWall popup interface" width="250">
+| Light Mode | Dark Mode |
+|------------|-----------|
+| <img src="assets/screenshot-light.png" height="400"> | <img src="assets/screenshot-dark.png" height="400"> |
+
 
 ## 🔧 Installation
 
@@ -24,6 +27,11 @@
 
 - Archive services: `archive.today`, `web.archive.org`
 - Browser: `tabs`, `activeTab`, `storage`
+
+## 📚 Documentation
+- [Changelog](docs/CHANGELOG.md)
+- [Technical Notes](docs/TECHNICAL.md)
+
 
 ---
 
