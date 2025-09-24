@@ -2,6 +2,22 @@
 
 📦 A browser extension that bypasses paywalls by instantly retrieving archived versions from [Archive.today](https://archive.today) and [Wayback Machine](https://web.archive.org).
 
+## 💡 What This Solves
+
+Reading news and research articles often means hitting paywalls, leading to a frustrating manual process of accessing archived versions:
+
+1. **Copy** the article URL
+2. **Open** Archive.today or Wayback Machine in a new tab  
+3. **Paste** the URL and wait for results
+4. **Navigate** to the archived version
+
+**This repetitive workflow takes 12-22 seconds per article. With ByeWall, it's now just 2-4 seconds - a 75-85% time savings!**
+
+ByeWall primarily leverages Archive.today for its speed and reliability in archiving current content, while also offering Wayback Machine as an alternative option for accessing historical snapshots and older archives.
+
+For heavy readers who encounter 5-10 paywalled articles daily, that's 1-3 minutes saved every day, or 6-18 hours reclaimed per year. Time that's better spent actually reading quality journalism and research.
+
+
 ## ✅ Features
 
 - One-click access to archived pages
