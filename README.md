@@ -34,10 +34,12 @@ For heavy readers who encounter 5-10 paywalled articles daily, that's 1-3 minute
 
 ## 🔧 Installation
 
-1. Download this repo
-2. Go to `chrome://extensions/`
-3. Enable **Developer mode**
-4. Click **Load unpacked** and select this folder
+
+1. [Download the latest release (v1.8.4)](https://github.com/elirangor/ByeWall/releases/download/1.8.4/ByeWall-v1.8.4.zip).  
+2. Extract the downloaded `.zip` file.  
+3. Open your browser’s **Extensions page** (usually found in Settings → Extensions or by right-clicking the toolbar and selecting *Manage extensions*).  
+4. Enable **Developer mode**.  
+5. Click **Load unpacked** and select the extracted folder.  
 
 ## 🔐 Permissions
 
