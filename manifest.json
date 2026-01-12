@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "ByeWall",
-  "version": "1.8.4",
-  "description": "Bypass paywalls quickly by accessing archived versions via Archive.today or Wayback Machine. View recently archived articles in a clean interface.",
+  "name": "Page Rewind",
+  "version": "1.8.5",
+  "description": "Open archived versions of web pages using Archive.today or the Wayback Machine. Easily access available snapshots in a clean, simple interface.",
   "action": {
-    "default_title": "ByeWall",
+    "default_title": "Page Rewind",
     "default_popup": "popup.html"
   },
   "background": {
@@ -27,17 +27,17 @@
   "commands": {
     "open_extension": {
       "suggested_key": {
-        "default": "Ctrl+Shift+E",
-        "mac": "Command+Shift+E"
+        "default": "Ctrl+Shift+Q",
+        "mac": "Command+Shift+Q"
       },
-      "description": "Open the ByeWall popup"
+      "description": "Open the Page Rewind popup"
     },
     "archive_current": {
       "suggested_key": {
         "default": "Ctrl+Shift+U",
         "mac": "Command+Shift+U"
       },
-      "description": "Read Behind the Wall (same as popup button)"
+      "description": "Open an archived snapshot of the current page"
     }
   }
 }

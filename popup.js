@@ -1,5 +1,36 @@
-/* popup.js – ByeWall (delegates to background, shows pending messages, warms prechecks) */
+/* popup.js – (delegates to background, shows pending messages, warms prechecks) */
 /* eslint-env browser, webextensions */
+
+/* ============================================================================
+ * Keyboard shortcut display (dynamic, reflects chrome://extensions/shortcuts)
+ * ==========================================================================*/
+function formatShortcut(s) {
+  if (!s) return "";
+  return s
+    .replaceAll("Command", "⌘")
+    .replaceAll("Ctrl", "Ctrl")
+    .replaceAll("Alt", "Alt")
+    .replaceAll("Shift", "Shift");
+}
+
+function updateShortcutHints() {
+  const s1 = document.getElementById("shortcut1");
+  const s2 = document.getElementById("shortcut2");
+  if (!s1 || !s2) return;
+
+  chrome.commands.getAll((commands) => {
+    const openCmd = commands.find((c) => c.name === "open_extension");
+    const archiveCmd = commands.find((c) => c.name === "archive_current");
+
+    s1.textContent = openCmd?.shortcut
+      ? formatShortcut(openCmd.shortcut)
+      : "Not set";
+
+    s2.textContent = archiveCmd?.shortcut
+      ? formatShortcut(archiveCmd.shortcut)
+      : "Not set";
+  });
+}
 
 /* ============================================================================
  * 1) Small utilities
@@ -55,7 +86,7 @@ function normalizeHistoryUrl(raw) {
       "fbclid",
       "mc_cid",
       "mc_eid",
-      "gift", // Added gift parameter for news sites
+      "gift"
     ];
     drop.forEach((k) => u.searchParams.delete(k));
     const qs = u.searchParams.toString();
@@ -270,34 +301,33 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   });
 
-// 5) Tab behavior choice - restore and save preference
-(async () => {
-  const { openInNewTab = true } = await getStorage("openInNewTab");
-  const tabChoice = document.getElementById("tabChoice");
-  if (!tabChoice) return;
+  // 5) Tab behavior choice - restore and save preference
+  (async () => {
+    const { openInNewTab = true } = await getStorage("openInNewTab");
+    const tabChoice = document.getElementById("tabChoice");
+    if (!tabChoice) return;
 
-  const options = tabChoice.querySelectorAll(".tab-option");
+    const options = tabChoice.querySelectorAll(".tab-option");
 
-  function updateActive(isNewTab) {
-    options.forEach(opt => opt.classList.remove("active"));
-    const activeOpt = tabChoice.querySelector(
-      `.tab-option[data-value="${isNewTab ? "new" : "same"}"]`
-    );
-    if (activeOpt) activeOpt.classList.add("active");
-  }
+    function updateActive(isNewTab) {
+      options.forEach((opt) => opt.classList.remove("active"));
+      const activeOpt = tabChoice.querySelector(
+        `.tab-option[data-value="${isNewTab ? "new" : "same"}"]`
+      );
+      if (activeOpt) activeOpt.classList.add("active");
+    }
 
-  options.forEach(opt => {
-    opt.addEventListener("click", () => {
-      const isNewTab = opt.dataset.value === "new";
-      setStorage("openInNewTab", isNewTab);
-      updateActive(isNewTab);
+    options.forEach((opt) => {
+      opt.addEventListener("click", () => {
+        const isNewTab = opt.dataset.value === "new";
+        setStorage("openInNewTab", isNewTab);
+        updateActive(isNewTab);
+      });
     });
-  });
 
-  // initialize state on load
-  updateActive(openInNewTab !== false);
-})();
-
+    // initialize state on load
+    updateActive(openInNewTab !== false);
+  })();
 
   // 6) Dark mode toggle (mirror to localStorage to prevent next-open flash)
   (async () => {
@@ -371,17 +401,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 50);
 
-    // 9) Platform-specific shortcut hints
-  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-
-  document.getElementById("shortcut1").textContent = isMac
-    ? "⌘+Shift+E"
-    : "Ctrl+Shift+E";
-
-  document.getElementById("shortcut2").textContent = isMac
-    ? "⌘+Shift+U"
-    : "Ctrl+Shift+U";
-
+  // 9) Dynamic shortcut hints (reflects chrome://extensions/shortcuts)
+  updateShortcutHints();
 
   if (archiveBtn) archiveBtn.addEventListener("click", doArchive);
 });

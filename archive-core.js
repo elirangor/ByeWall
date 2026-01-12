@@ -1,7 +1,7 @@
 // archive-core.js — shared logic for ByeWall (MV3)
 
 // -------- Tunable timeouts (ms) --------
-const AT_PRECHECK_TIMEOUT_MS = 700; // Archive.today precheck (was 1000)
+const AT_PRECHECK_TIMEOUT_MS = 2000; // Archive.today precheck - increased for reliability
 const WB_PRECHECK_TIMEOUT_MS = 700; // Wayback precheck (was 1000)
 const WB_FULL_TIMEOUT_MS = 8000; // Wayback full lookup cap (was 15000)
 
@@ -115,14 +115,19 @@ export async function precheckArchiveToday(
   targetUrl,
   timeoutMs = AT_PRECHECK_TIMEOUT_MS
 ) {
-  if (!/^https?:\/\//i.test(targetUrl))
+  console.log('[ByeWall Precheck] Starting precheck for:', targetUrl, 'timeout:', timeoutMs);
+  
+  if (!/^https?:\/\//i.test(targetUrl)) {
+    console.log('[ByeWall Precheck] Unsupported protocol');
     return { ok: true, hasSnapshot: false, reason: "unsupported" };
+  }
 
   const checkedUrl = `https://archive.today/${NEWEST_PATH}${targetUrl}`;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
 
   try {
+    console.log('[ByeWall Precheck] Fetching:', checkedUrl);
     const resp = await fetch(checkedUrl, {
       signal: ctrl.signal,
       redirect: "follow",
@@ -132,14 +137,22 @@ export async function precheckArchiveToday(
     });
 
     const finalUrl = resp.url || checkedUrl;
+    console.log('[ByeWall Precheck] Final URL after redirects:', finalUrl);
+    
     // Redirected away from /newest/ => snapshot exists
     if (!finalUrl.includes("/" + NEWEST_PATH)) {
+      console.log('[ByeWall Precheck] Redirected away from /newest/ - snapshot exists!');
       return { ok: true, hasSnapshot: true, checkedUrl, finalUrl };
     }
 
     // Still on /newest/ — peek a small slice for "No results"
     const head = await readFirstText(resp, 4096);
-    if (NO_RESULTS_RE.test(head)) {
+    console.log('[ByeWall Precheck] Response head (first 200 chars):', head.substring(0, 200));
+    const hasNoResults = NO_RESULTS_RE.test(head);
+    console.log('[ByeWall Precheck] "No results" test result:', hasNoResults);
+    
+    if (hasNoResults) {
+      console.log('[ByeWall Precheck] NO SNAPSHOT FOUND');
       return {
         ok: true,
         hasSnapshot: false,
@@ -148,10 +161,14 @@ export async function precheckArchiveToday(
         finalUrl,
       };
     }
+    console.log('[ByeWall Precheck] Snapshot appears to exist (no "No results" text found)');
     return { ok: true, hasSnapshot: true, checkedUrl, finalUrl };
   } catch (err) {
-    if (err?.name === "AbortError")
+    console.error('[ByeWall Precheck] Error during precheck:', err);
+    if (err?.name === "AbortError") {
+      console.log('[ByeWall Precheck] Timeout after', timeoutMs, 'ms');
       return { ok: false, error: "ARCHIVE_TODAY_TIMEOUT" };
+    }
     return { ok: false, error: "NETWORK_ERROR" };
   } finally {
     clearTimeout(timer);
@@ -233,28 +250,54 @@ async function getLatestWaybackSnapshot(url) {
 
 /* ---------- The single action used by popup & shortcuts ---------- */
 export async function performArchive() {
+  console.log('[ByeWall] performArchive() called');
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = tab?.url || "";
   const title = tab?.title || "";
   const currentTabId = tab?.id;
 
-  if (!isValidUrl(url)) return { ok: false, error: "INVALID_URL" };
-  if (isUnsupportedUrl(url)) return { ok: false, error: "UNSUPPORTED_URL" };
+  console.log('[ByeWall] Current URL:', url);
+
+  if (!isValidUrl(url)) {
+    console.log('[ByeWall] Invalid URL');
+    return { ok: false, error: "INVALID_URL" };
+  }
+  if (isUnsupportedUrl(url)) {
+    console.log('[ByeWall] Unsupported URL');
+    return { ok: false, error: "UNSUPPORTED_URL" };
+  }
 
   const {
     selectedArchiveServicePref = "archiveToday",
-    openInNewTab = true, // Default to new tab
+    openInNewTab = true,
   } = await getStorage(["selectedArchiveServicePref", "openInNewTab"]);
+
+  console.log('[ByeWall] Selected service:', selectedArchiveServicePref);
 
   let archiveUrl = null;
 
   if (selectedArchiveServicePref === "archiveToday") {
-    // Quick precheck; if clearly no snapshot, bail fast.
+    console.log('[ByeWall] Running Archive.Today precheck...');
+    // Run precheck with 2s timeout for reliability
     const pre = await precheckArchiveToday(url);
+    
+    // Debug logging
+    console.log('[ByeWall] Precheck result:', JSON.stringify(pre));
+    
+    // ONLY block if precheck EXPLICITLY confirms no snapshot exists
     if (pre.ok && pre.hasSnapshot === false) {
+      console.log('[ByeWall] ❌ Blocking - no snapshot exists');
       return { ok: false, error: "NO_SNAPSHOT_ARCHIVE_TODAY" };
     }
-    // proceed even if precheck timed out—fallback path
+    
+    // If precheck timed out, proceed optimistically
+    if (!pre.ok) {
+      console.log('[ByeWall] ⚠️ Precheck uncertain (timeout/error), proceeding optimistically');
+    } else if (pre.hasSnapshot) {
+      console.log('[ByeWall] ✅ Snapshot confirmed, proceeding');
+    }
+    
+    console.log('[ByeWall] Proceeding to open archive');
     archiveUrl = `https://archive.today/${NEWEST_PATH}${url}`;
   } else {
     // Wayback: quick precheck (700ms). If "no", exit early.
@@ -286,17 +329,18 @@ export async function performArchive() {
     archiveUrl
   );
 
+  console.log('[ByeWall] Opening URL:', archiveUrl, 'in new tab:', openInNewTab);
+
   // Handle tab opening based on user preference
   if (openInNewTab) {
-    // Open in new tab adjacent to current tab
     await chrome.tabs.create({
       url: archiveUrl,
-      index: tab.index + 1, // This makes it open right next to current tab
+      index: tab.index + 1,
     });
   } else {
-    // Replace current tab
     await chrome.tabs.update(currentTabId, { url: archiveUrl });
   }
 
+  console.log('[ByeWall] Successfully opened archive');
   return { ok: true, archiveUrl, openedInNewTab: openInNewTab };
 }

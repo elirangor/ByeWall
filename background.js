@@ -43,12 +43,17 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
 // Keyboard shortcuts
 chrome.commands.onCommand.addListener(async (command) => {
+  console.log('[ByeWall Background] Command received:', command);
   try {
     if (command === "open_extension") {
       await chrome.action.openPopup();
     } else if (command === "archive_current") {
+      console.log('[ByeWall Background] Running performArchive from shortcut');
+      // Use same performArchive() as popup - with precheck
       const res = await performArchive();
+      console.log('[ByeWall Background] performArchive result:', res);
       if (!res || res.ok === false) {
+        console.log('[ByeWall Background] Failed, opening popup with error');
         // Stash message for the popup and open it so the user sees feedback
         await chrome.storage.local.set({
           byewallPendingMessage: {
@@ -59,7 +64,7 @@ chrome.commands.onCommand.addListener(async (command) => {
         await chrome.action.openPopup();
       }
     }
-  } catch {
-    // Avoid unhandled rejections in the service worker
+  } catch (err) {
+    console.error('[ByeWall Background] Error:', err);
   }
 });

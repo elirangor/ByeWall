@@ -16,13 +16,13 @@
 
   <style>
     body {
-      font-family: "Inter", sans-serif;
-      background-color: #f8f9fa;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
       padding: 12px;
       width: 350px;
       margin: 0;
       box-sizing: border-box;
-      transition: background-color 0.3s, color 0.3s;
+      transition: background 0.3s, color 0.3s;
     }
 
     .header-container {
@@ -34,7 +34,7 @@
 
     h3 {
       margin: 0;
-      color: #212529;
+      color: #2c3e50;
       font-size: 20px;
       font-weight: 600;
       transition: color 0.3s;
@@ -43,17 +43,18 @@
     h4 {
       margin: 0 0 8px 0;
       font-size: 14px;
-      color: #495057;
+      color: #546e7a;
       transition: color 0.3s;
     }
 
     .options-section {
       background: white;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 12px;
       margin-bottom: 12px;
-      border: 1px solid #e9ecef;
-      transition: background-color 0.3s, border-color 0.3s;
+      border: 1px solid #e0e7ed;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
 
     label {
@@ -62,7 +63,8 @@
       margin-bottom: 8px;
       cursor: pointer;
       font-size: 13px;
-      color: #495057;
+      font-family: inherit;
+      color: #546e7a;
       transition: color 0.3s;
     }
 
@@ -77,7 +79,7 @@
       height: 16px;
       margin-right: 10px;
       border-radius: 50%;
-      border: 2px solid #cfd4da;
+      border: 2px solid #cbd5e0;
       background: #fff;
       display: inline-grid;
       place-content: center;
@@ -92,11 +94,11 @@
       border-radius: 50%;
       transform: scale(0);
       transition: transform .15s ease;
-      background: #0d6efd;
+      background: #3b82f6;
     }
 
     input[type="radio"]:checked {
-      border-color: #0d6efd;
+      border-color: #3b82f6;
     }
 
     input[type="radio"]:checked::before {
@@ -104,7 +106,7 @@
     }
 
     input[type="radio"]:focus-visible {
-      outline: 2px solid rgba(13, 110, 253, .55);
+      outline: 2px solid rgba(59, 130, 246, .3);
       outline-offset: 2px;
     }
 
@@ -123,26 +125,27 @@
 
     button {
       width: 100%;
-      background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: white;
       padding: 10px 14px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 13px;
       font-weight: 500;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
     }
 
     button:hover:not(:disabled) {
-      background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
-      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
       transform: translateY(-1px);
     }
 
     button:disabled {
-      background: #6c757d;
+      background: #a0aec0;
       cursor: not-allowed;
       transform: none;
       box-shadow: none;
@@ -151,28 +154,29 @@
     .credit {
       margin-top: 12px;
       font-size: 10px;
-      color: #6c757d;
+      color: #718096;
       text-align: center;
       padding-top: 10px;
-      border-top: 1px solid #e9ecef;
+      border-top: 1px solid #e0e7ed;
       transition: color 0.3s, border-color 0.3s;
     }
 
     .credit a {
-      color: #007bff;
+      color: #3b82f6;
       text-decoration: none;
       font-weight: 500;
     }
 
     .credit a:hover {
       text-decoration: underline;
+      color: #2563eb;
     }
 
     .shortcut-hint {
       margin: 10px 0 0 0;
       font-size: 13px;
       line-height: 1.6;
-      color: #495057;
+      color: #546e7a;
       text-align: center;
       transition: color 0.3s;
     }
@@ -186,20 +190,20 @@
       position: fixed;
       z-index: 1000;
       inset: 0;
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: rgba(0, 0, 0, 0.3);
       align-items: center;
       justify-content: center;
     }
 
     .message-box-content {
-      background-color: #fefefe;
+      background: white;
       margin: auto;
       padding: 20px;
-      border: 1px solid #888;
+      border: 1px solid #e0e7ed;
       width: 80%;
       max-width: 300px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       text-align: center;
       transition: background-color 0.3s, border-color 0.3s;
     }
@@ -207,25 +211,26 @@
     .message-box-content p {
       margin-bottom: 15px;
       font-size: 14px;
-      color: #333;
+      color: #2c3e50;
       transition: color 0.3s;
     }
 
     .message-box-content button {
-      background: #007bff;
+      background: #3b82f6;
       color: white;
       padding: 8px 15px;
       border: 0;
-      border-radius: 5px;
+      border-radius: 6px;
       font-size: 13px;
+      font-family: inherit;
     }
 
     .message-box-content button:hover {
-      background: #0056b3;
+      background: #2563eb;
     }
 
     .dark-mode {
-      background-color: #26292e;
+      background: linear-gradient(135deg, #1a1d23 0%, #26292e 100%);
       color: #e0e0e0;
     }
 
@@ -238,6 +243,7 @@
     .dark-mode .message-box-content {
       background: #31363d;
       border-color: #444c56;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .dark-mode label {
@@ -246,12 +252,16 @@
 
     .dark-mode button {
       background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-      box-shadow: 0 2px 4px rgba(74, 158, 255, 0.3);
+      box-shadow: 0 2px 6px rgba(74, 158, 255, 0.3);
     }
 
     .dark-mode button:hover:not(:disabled) {
       background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-      box-shadow: 0 4px 8px rgba(74, 158, 255, 0.4);
+      box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
+    }
+
+    .dark-mode .message-box {
+      background-color: rgba(0, 0, 0, 0.5);
     }
 
     .dark-mode .message-box-content p {
@@ -301,7 +311,7 @@
       position: absolute;
       cursor: pointer;
       inset: 0;
-      background-color: #ccc;
+      background-color: #cbd5e0;
       transition: .4s;
       border-radius: 20px;
     }
@@ -316,10 +326,11 @@
       background: #fff;
       transition: .4s;
       border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     input:checked+.slider {
-      background-color: #2196F3;
+      background-color: #3b82f6;
     }
 
     input:checked+.slider:before {
@@ -327,16 +338,17 @@
     }
 
     .history-item {
-      background: #fff;
-      border: 1px solid #e9ecef;
-      border-radius: 4px;
+      background: white;
+      border: 1px solid #e0e7ed;
+      border-radius: 6px;
       padding: 8px;
       margin-bottom: 5px;
       display: block;
       font-size: 12px;
-      color: #333;
+      color: #2c3e50;
       text-decoration: none;
-      transition: background-color 0.2s, color 0.2s;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .history-item-content {
@@ -349,11 +361,12 @@
       white-space: normal;
       word-wrap: break-word;
       font-size: 13px;
+      color: #2c3e50;
     }
 
     .history-item-content .details {
       font-size: 10px;
-      color: #6c757d;
+      color: #718096;
       display: flex;
       justify-content: space-between;
       margin-top: 4px;
@@ -369,24 +382,32 @@
     }
 
     .history-item:hover {
-      background-color: #f1f3f5;
+      background-color: #f7fafc;
+      border-color: #cbd5e0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
     .dark-mode .history-item {
       background: #31363d;
       border-color: #444c56;
       color: #e0e0e0;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
 
     .dark-mode .history-item:hover {
       background-color: #3e444b;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark-mode .history-item-content .title {
+      color: #e0e0e0;
     }
 
     .dark-mode .history-item-content .details {
       color: #a0a0a0;
     }
 
-    /* Tab behavior section styles - moved to after history */
+    /* Tab behavior section styles */
     .tab-behavior-section {
       margin: 8px 0 12px 0;
       padding: 0;
@@ -397,11 +418,12 @@
     .tab-choice {
       display: flex;
       width: 100%;
-      border: 1px solid #e9ecef;
-      border-radius: 6px;
+      border: 1px solid #e0e7ed;
+      border-radius: 8px;
       overflow: hidden;
       background: white;
-      transition: background-color 0.3s, border-color 0.3s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
 
     .tab-option {
@@ -410,30 +432,33 @@
       padding: 10px 0;
       cursor: pointer;
       font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
       user-select: none;
       transition: background 0.2s, color 0.2s;
       background: transparent;
-      color: #495057;
+      color: #546e7a;
       border: none;
     }
 
     .tab-option+.tab-option {
-      border-left: 1px solid #e9ecef;
+      border-left: 1px solid #e0e7ed;
     }
 
     .tab-option.active {
-      background: #0d6efd;
+      background: #3b82f6;
       color: white;
     }
 
     .tab-option:not(.active):hover {
-      background: #f1f3f5;
+      background: #f7fafc;
     }
 
     /* Dark mode adjustments for tab behavior */
     .dark-mode .tab-choice {
       background: #31363d;
       border-color: #444c56;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
 
     .dark-mode .tab-option {
@@ -457,7 +482,7 @@
 
 <body>
   <div class="header-container">
-    <h3>ByeWall 📰</h3>
+    <h3>Page Rewind 📰</h3>
     <div class="toggle-container">
       <label class="toggle-switch">
         <input type="checkbox" id="darkModeToggle">
@@ -477,7 +502,7 @@
     </label>
   </div>
 
-  <button id="archive">Read Behind the Wall</button>
+  <button id="archive">Rewind This Page</button>
 
   <!-- History section - only shows when there is history -->
   <div id="history-section" style="margin-top: 12px; display: none;">
@@ -495,7 +520,7 @@
 
   <!-- Always visible sections -->
   <p class="shortcut-hint" id="shortcut-hint">
-    ⌨️ <span id="shortcut1"></span> - Launch ByeWall <br>
+    ⌨️ <span id="shortcut1"></span> - Launch "Page Rewind" <br>
     ⌨️ <span id="shortcut2"></span> - Open latest snapshot
   </p>
 

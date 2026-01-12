@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.8.5
+
+- **Improved UI**: Refined light mode for a softer, more eye-friendly look + consistent fonts across buttons and controls
+- **No empty archive tabs**: When using the keyboard shortcut, the extension now blocks opening Archive.Today if no snapshot exists and shows “No snapshot available…” instead
+- **Minor wording updates**: Small adjustments to names and button labels for clarity and consistency
+
 ## v1.8.4
 
 - **Improved tab behavior control UI**
@@ -10,17 +16,21 @@
 - **Smart tab positioning**: When opening in new tab, the archived page opens adjacent to the current tab instead of at the end
 
 ## v1.8.2
+
 - **Added keyboard shortcuts section in the popup** for easier discovery and quick reference
 
 ## v1.8.1
+
 - **Fixed URL normalization for news sites**: Added support for removing `gift` parameter (commonly used by Haaretz and other news sites for temporary access links). Extension now properly detects archived versions of articles even when accessed via gift URLs like `?gift=abc123`.
 
 ## v1.8
+
 - **Streamlined keyboard shortcuts**  
   - `Ctrl+Shift+E` (`Cmd+Shift+E` on Mac): Open the extension  
   - `Ctrl+Shift+U` (`Cmd+Shift+U` on Mac): Instantly open the current page with your preferred service  
 
 ## v1.7.x
+
 - **Intelligent fallback**: If Archive.today pre-check fails/times out, the extension now tries to open the archive anyway instead of showing an error
 - **No empty tabs**: background pre-check for Archive.today (1s timeout) shows an inline "No snapshot available" instead.  
 - **Faster popup**: warm pre-check on open, smaller HTML sniff, 100ms click debounce.  
