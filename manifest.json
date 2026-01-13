@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Page Rewind",
   "version": "1.8.6",
-  "description": "Open archived versions of web pages using Archive.today or the Wayback Machine. Easily access available snapshots in a clean, simple interface.",
+  "description": "Open archived versions of web pages using Archive.today or the Wayback Machine.",
   "action": {
     "default_title": "Page Rewind",
     "default_popup": "popup.html"
