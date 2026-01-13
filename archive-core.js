@@ -164,7 +164,7 @@ export async function precheckArchiveToday(
     console.log('[ByeWall Precheck] Snapshot appears to exist (no "No results" text found)');
     return { ok: true, hasSnapshot: true, checkedUrl, finalUrl };
   } catch (err) {
-    console.error('[ByeWall Precheck] Error during precheck:', err);
+    console.log('[ByeWall Precheck] Error during precheck (non-critical):', err);
     if (err?.name === "AbortError") {
       console.log('[ByeWall Precheck] Timeout after', timeoutMs, 'ms');
       return { ok: false, error: "ARCHIVE_TODAY_TIMEOUT" };

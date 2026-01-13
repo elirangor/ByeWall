@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.6
+
+- Downgraded non-critical precheck DOMException logging to avoid misleading console errors.
+
 ## v1.8.5
 
 - **Improved UI**: Refined light mode for a softer, more eye-friendly look + consistent fonts across buttons and controls
