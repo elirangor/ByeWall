@@ -302,7 +302,24 @@ export async function performArchive() {
       index: tab.index + 1,
     });
   } else {
-    await chrome.tabs.update(currentTabId, { url: archiveUrl });
+    // Navigate in same tab while preserving history
+    // Execute script to navigate via history.pushState + location.href
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId: currentTabId },
+        func: (archiveUrl) => {
+          // Push current state to history so back button works
+          window.history.pushState(null, '', window.location.href);
+          // Navigate to archive
+          window.location.href = archiveUrl;
+        },
+        args: [archiveUrl]
+      });
+    } catch (err) {
+      // Fallback to direct tab update if scripting fails
+      console.warn('Failed to use history navigation, falling back:', err);
+      await chrome.tabs.update(currentTabId, { url: archiveUrl });
+    }
   }
 
   return { ok: true, archiveUrl, openedInNewTab: openInNewTab };
