@@ -46,8 +46,17 @@ chrome.commands.onCommand.addListener(async (command) => {
   console.log('[ByeWall Background] Command received:', command);
   try {
     if (command === "open_extension") {
-      await chrome.action.openPopup();
-    } else if (command === "archive_current") {
+      const wins = await chrome.windows.getAll({ populate: false });
+      const hasNormalWin = wins.some((w) => w.type === "normal");
+      if (!hasNormalWin) return;
+
+      try {
+        await chrome.action.openPopup();
+      } catch (e) {
+        console.debug("[ByeWall Background] openPopup failed:", e?.message || e);
+      }
+    }
+    else if (command === "archive_current") {
       console.log('[ByeWall Background] Running performArchive from shortcut');
       // Use same performArchive() as popup - with precheck
       const res = await performArchive();

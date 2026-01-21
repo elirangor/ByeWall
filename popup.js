@@ -86,7 +86,7 @@ function normalizeHistoryUrl(raw) {
       "fbclid",
       "mc_cid",
       "mc_eid",
-      "gift"
+      "gift",
     ];
     drop.forEach((k) => u.searchParams.delete(k));
     const qs = u.searchParams.toString();
@@ -242,6 +242,13 @@ function messageFromErrorCode(code) {
       return "No archived version found in Wayback Machine for this URL.";
     case "WAYBACK_TIMEOUT":
       return "Request timed out. The archive service might be slow.";
+
+    // NEW (hermetic) cases:
+    case "ARCHIVE_TODAY_TIMEOUT":
+    case "ARCHIVE_TODAY_UNCERTAIN":
+    case "NETWORK_ERROR":
+      return "Couldn’t verify a snapshot on Archive.Today (blocked or timed out).";
+
     default:
       return "Service unavailable. Please try again or use the other archive option.";
   }
