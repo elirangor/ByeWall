@@ -206,9 +206,11 @@ async function loadHistory() {
     meta.className = "details";
 
     const svc = document.createElement("span");
+    svc.className = "service"; // Add class for badge styling
     svc.textContent = item.service;
 
     const ts = document.createElement("span");
+    ts.className = "timestamp"; // Add class for bolder timestamp
     ts.textContent = rtl
       ? `${dt.getDate()}/${dt.getMonth() + 1}/${String(dt.getFullYear()).slice(
           2
@@ -247,7 +249,7 @@ function messageFromErrorCode(code) {
     case "ARCHIVE_TODAY_TIMEOUT":
     case "ARCHIVE_TODAY_UNCERTAIN":
     case "NETWORK_ERROR":
-      return "Couldn’t verify a snapshot on Archive.Today (blocked or timed out).";
+      return "Couldn't verify a snapshot on Archive.Today (blocked or timed out).";
 
     default:
       return "Service unavailable. Please try again or use the other archive option.";

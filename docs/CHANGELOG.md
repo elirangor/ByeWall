@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.9
+
+- **Improved keyboard shortcut reliability**: Increased Archive.Today timeout and added automatic retry logic to prevent "blocked or timed out" errors on first attempt
+- **Enhanced history visibility**: Redesigned service badges and timestamps with better visual hierarchy - service names now appear in outlined badges with bold text, timestamps are extra bold for easier scanning
+- **Better visual feedback**: Metadata in history items is now more prominent and easier to distinguish at a glance
+
 ## v1.8.6
 
 - Downgraded non-critical precheck DOMException logging to avoid misleading console errors.

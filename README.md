@@ -19,7 +19,7 @@
 
 ## 🔧 Installation
 
-1. [Download the latest release](https://github.com/elirangor/ByeWall/releases/download/1.8.7/ByeWall-v1.8.7.zip).  
+1. [Download the latest release](https://github.com/elirangor/ByeWall/releases/download/1.9/ByeWall-v1.9.zip).  
 2. Extract the `.zip` file.  
 3. Open your browser’s **Extensions page**.  
 4. Enable **Developer mode**.  

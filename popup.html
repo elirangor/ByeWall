@@ -366,12 +366,32 @@
       color: #202124;
     }
 
+    /* OPTION 3: MINIMAL OUTLINE BADGE + BOLD TIMESTAMP (RECOMMENDED) */
     .history-item-content .details {
       font-size: 10px;
-      color: #5f6368;
       display: flex;
       justify-content: space-between;
-      margin-top: 4px;
+      align-items: center;
+      margin-top: 6px;
+      gap: 8px;
+    }
+
+    /* Service - pill-style with thicker border and bold text */
+    .history-item-content .details .service {
+      color: #1a73e8;
+      font-weight: 600;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1.5px solid #1a73e8;
+      background: transparent;
+    }
+
+    /* Timestamp - primary focus with extra bold */
+    .history-item-content .details .timestamp {
+      font-weight: 700;
+      color: #202124;
+      font-size: 10px;
     }
 
     .history-item.rtl {
@@ -405,8 +425,15 @@
       color: #e0e0e0;
     }
 
-    .dark-mode .history-item-content .details {
-      color: #a0a0a0;
+    /* Dark mode - thicker outline badge */
+    .dark-mode .history-item-content .details .service {
+      color: #8ab4f8;
+      border-color: #8ab4f8;
+      border-width: 1.5px;
+    }
+
+    .dark-mode .history-item-content .details .timestamp {
+      color: #f0f0f0;
     }
 
     /* Tab behavior section styles */

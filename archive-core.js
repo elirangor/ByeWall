@@ -1,7 +1,7 @@
 // archive-core.js — shared logic for ByeWall (MV3)
 
 // -------- Tunable timeouts (ms) --------
-const AT_PRECHECK_TIMEOUT_MS = 2000; // Archive.today precheck - increased for reliability
+const AT_PRECHECK_TIMEOUT_MS = 3500; // Archive.today precheck - increased for keyboard shortcut reliability
 const WB_PRECHECK_TIMEOUT_MS = 700; // Wayback precheck (was 1000)
 const WB_FULL_TIMEOUT_MS = 8000; // Wayback full lookup cap (was 15000)
 
@@ -247,10 +247,17 @@ export async function performArchive() {
   let archiveUrl = null;
 
   if (selectedArchiveServicePref === "archiveToday") {
-    // HERMETIC:
+    // HERMETIC with RETRY:
     // - Only open if snapshot is CONFIRMED (redirected away from /newest/)
-    // - If precheck fails/timeout/blocked => do NOT open
-    const pre = await precheckArchiveToday(url);
+    // - If precheck fails/timeout/blocked => retry once with longer timeout
+    // - If still fails => do NOT open
+    let pre = await precheckArchiveToday(url);
+
+    // Retry once on timeout (common on first keyboard shortcut attempt)
+    if (!pre.ok && pre.error === "ARCHIVE_TODAY_TIMEOUT") {
+      console.log('[ByeWall] Archive.Today timeout on first attempt, retrying with longer timeout...');
+      pre = await precheckArchiveToday(url, AT_PRECHECK_TIMEOUT_MS + 2500); // Add 2.5s extra
+    }
 
     if (!pre.ok) {
       return {
