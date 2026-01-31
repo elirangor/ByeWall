@@ -11,7 +11,7 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["tabs", "storage", "activeTab", "notifications", "scripting"],
+  "permissions": ["tabs", "storage", "activeTab", "scripting"],
   "host_permissions": [
     "https://archive.today/*",
     "https://archive.ph/*",
