@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0
+
+- **Added Clear History management with improved UX**: Clear History action added to Recently Viewed section with in-popup confirmation and success feedback, redesigned as a subtle tertiary action with consistent styling and better visual hierarchy
+- **Major codebase refactor**: Removed duplicate code, split logic into smaller modules, and improved overall structure and maintainability
+- **Theme and layout polish**: Fixed dark mode visibility issues, removed unwanted background artifacts, and tightened spacing between history elements
+
 ## v1.9
 
 - **Improved keyboard shortcut reliability**: Increased Archive.Today timeout and added automatic retry logic to prevent "blocked or timed out" errors on first attempt

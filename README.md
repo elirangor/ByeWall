@@ -19,11 +19,13 @@
 
 ## 🔧 Installation
 
-1. [Download the latest release](https://github.com/elirangor/ByeWall/releases/download/1.9/PageRewind-v1.9.zip).  
-2. Extract the `.zip` file.  
-3. Open your browser’s **Extensions page**.  
-4. Enable **Developer mode**.  
-5. Click **Load unpacked** and select the extracted folder.
+Install the Page Rewind extension directly from the Chrome Web Store:
+
+1. [Go to the Page Rewind extension on the Chrome Web Store](https://chromewebstore.google.com/detail/page-rewind/jagkfgieephkcbdhanohgfkeghfjnmcf)
+2. Click **Add to Chrome**.
+3. Confirm by clicking **Add extension**.
+
+The extension will be installed automatically and will update automatically when new versions are released.
 
 ## 🔐 Permissions
 
