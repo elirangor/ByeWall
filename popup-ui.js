@@ -3,9 +3,19 @@
 import { isRTL } from './utils.js';
 
 /**
- * Format date for history display
+ * Format date for history display with dynamic relative time + absolute timestamp
  */
-function formatHistoryDate(timestamp, rtl) {
+function formatHistoryDate(timestamp) {
+  const now = Date.now();
+  const diff = now - timestamp;
+  
+  // Time constants
+  const MINUTE = 60 * 1000;
+  const HOUR = 60 * MINUTE;
+  const DAY = 24 * HOUR;
+  const WEEK = 7 * DAY;
+  
+  // Always show absolute date/time
   const dt = new Date(timestamp);
   const pad = (n) => String(n).padStart(2, '0');
   const hours = pad(dt.getHours());
@@ -13,10 +23,33 @@ function formatHistoryDate(timestamp, rtl) {
   const day = dt.getDate();
   const month = dt.getMonth() + 1;
   const year = String(dt.getFullYear()).slice(2);
-
-  return rtl
-    ? `${day}/${month}/${year}, ${hours}:${minutes}`
-    : `${hours}:${minutes}, ${day}/${month}/${year}`;
+  const absoluteTime = `${hours}:${minutes}, ${day}/${month}/${year}`;
+  
+  // Just now (under 1 minute)
+  if (diff < MINUTE) {
+    return `Just now, ${absoluteTime}`;
+  }
+  
+  // Minutes ago (1-59 minutes)
+  if (diff < HOUR) {
+    const mins = Math.floor(diff / MINUTE);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago, ${absoluteTime}`;
+  }
+  
+  // Hours ago (1-23 hours)
+  if (diff < DAY) {
+    const hrs = Math.floor(diff / HOUR);
+    return `${hrs} ${hrs === 1 ? 'hour' : 'hours'} ago, ${absoluteTime}`;
+  }
+  
+  // Days ago (1-6 days)
+  if (diff < WEEK) {
+    const days = Math.floor(diff / DAY);
+    return `${days} ${days === 1 ? 'day' : 'days'} ago, ${absoluteTime}`;
+  }
+  
+  // Older: show only absolute date/time
+  return absoluteTime;
 }
 
 /**
@@ -66,7 +99,7 @@ export function renderHistory(historyItems) {
 
     const ts = document.createElement('span');
     ts.className = 'timestamp';
-    ts.textContent = formatHistoryDate(item.timestamp, rtl);
+    ts.textContent = formatHistoryDate(item.timestamp);
 
     meta.appendChild(svc);
     meta.appendChild(ts);
@@ -176,11 +209,11 @@ export function updateShortcutHints(formatShortcut) {
     const openCmd = commands.find((c) => c.name === 'open_extension');
     const archiveCmd = commands.find((c) => c.name === 'archive_current');
 
-    s1.textContent = openCmd?.shortcut
+    s1.innerHTML = openCmd?.shortcut
       ? formatShortcut(openCmd.shortcut)
       : 'Not set';
 
-    s2.textContent = archiveCmd?.shortcut
+    s2.innerHTML = archiveCmd?.shortcut
       ? formatShortcut(archiveCmd.shortcut)
       : 'Not set';
   });

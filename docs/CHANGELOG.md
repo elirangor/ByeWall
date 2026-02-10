@@ -1,5 +1,15 @@
 # Changelog
 
+## v2.1
+
+- **Dynamic relative timestamps**: History items now show human-friendly time indicators ("Just now", "15 mins ago", "3 hours ago", "2 days ago") alongside absolute timestamps for items under 7 days old, providing both context and precision at a glance
+- **Improved keyboard shortcut display**: Keyboard shortcuts now render as styled `<kbd>` badges with proper visual hierarchy, making them easier to scan and more visually consistent with modern UI patterns
+- **Enhanced footer styling**: Improved color contrast and visual hierarchy in the footer section, with better border visibility in light mode and refined text colors for improved readability in both light and dark modes
+- **RTL text support improvements**: Fixed timestamp positioning for right-to-left languages (Hebrew, Arabic) to ensure consistent right-aligned placement regardless of content direction
+- **Simplified error message design**: Redesigned modal dialogs with cleaner, more focused styling - removed excessive blur effects, animations, and visual noise for a more professional and accessible error presentation
+- **Message box width optimization**: Reduced error dialog width from 85% to 70% for better visual balance and less intrusive presentation within the popup interface
+
+
 ## v2.0
 
 - **Added Clear History management with improved UX**: Clear History action added to Recently Viewed section with in-popup confirmation and success feedback, redesigned as a subtle tertiary action with consistent styling and better visual hierarchy

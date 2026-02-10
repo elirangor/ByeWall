@@ -224,6 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const clearBtn = document.getElementById('clearHistory');
   if (clearBtn) clearBtn.addEventListener('click', handleClearHistory);
 
-  // Dynamic shortcut hints
-  updateShortcutHints(formatShortcut);
+  // Dynamic shortcut hints with kbd tags
+  updateShortcutHints((shortcut) => {
+    if (!shortcut) return '';
+    // Wrap each key in a <kbd> tag
+    return shortcut
+      .split('+')
+      .map(key => {
+        const formatted = key
+          .replace('Command', '⌘')
+          .replace('Ctrl', 'Ctrl')
+          .replace('Alt', 'Alt')
+          .replace('Shift', 'Shift');
+        return `<kbd>${formatted}</kbd>`;
+      })
+      .join('+');
+  });
 });

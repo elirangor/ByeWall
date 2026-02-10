@@ -127,17 +127,18 @@ button:disabled {
 .credit {
   margin-top: 12px;
   font-size: 10px;
-  color: #202124;
+  color: #5f6368;
   text-align: center;
   padding-top: 10px;
-  border-top: 1px solid #dadce0;
+  border-top: 1px solid #bdc1c6;
   transition: color 0.3s, border-color 0.3s;
 }
 
 .credit a {
   color: #1a73e8;
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 500;
+  transition: color 0.15s ease;
 }
 
 .credit a:hover {
@@ -148,10 +149,24 @@ button:disabled {
 .shortcut-hint {
   margin: 10px 0 0 0;
   font-size: 13px;
-  line-height: 1.6;
-  color: #202124;
+  line-height: 1.8;
+  color: #3c4043;
   text-align: center;
   transition: color 0.3s;
+}
+
+.shortcut-hint kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  background: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  margin: 0 2px;
+  font-weight: 600;
+  color: #202124;
 }
 
 .message-box {
@@ -162,20 +177,19 @@ button:disabled {
   background-color: rgba(0, 0, 0, 0.4);
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(2px);
 }
 
 .message-box-content {
   background: #fff;
   margin: auto;
   padding: 24px;
-  border: 1px solid #dadce0;
-  width: 85%;
-  max-width: 320px;
+  border: none;
+  width: 70%;
+  max-width: 280px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(60, 64, 67, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
   text-align: center;
-  transition: background-color 0.3s, border-color 0.3s;
+  transition: background-color 0.3s;
 }
 
 .message-box-content p {
@@ -183,6 +197,7 @@ button:disabled {
   font-size: 14px;
   color: #3c4043;
   line-height: 1.5;
+  font-weight: 400;
   transition: color 0.3s;
 }
 
@@ -195,37 +210,35 @@ button:disabled {
 .message-box-content button {
   background: #1a73e8;
   color: white;
-  padding: 10px 20px;
+  padding: 10px 24px;
   border: 0;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
-  min-width: 70px;
+  transition: background 0.2s ease;
+  min-width: 80px;
 }
 
 .message-box-content button:hover {
   background: #1557b0;
-  transform: translateY(-1px);
 }
 
 .message-box-content button:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 /* Secondary button style for "No" button */
 .message-box-content button:last-child:not(:only-child) {
-  background: #fff;
+  background: #f1f3f4;
   color: #5f6368;
-  border: 1px solid #dadce0;
+  border: none;
 }
 
 .message-box-content button:last-child:not(:only-child):hover {
-  background: #f8f9fa;
+  background: #e8eaed;
   color: #202124;
-  border-color: #dadce0;
 }
 
 /* Toggle switch */
@@ -331,6 +344,8 @@ input:checked + .slider:before {
   font-weight: 600;
   color: #5f6368;
   font-size: 10px;
+  direction: ltr;
+  text-align: right;
 }
 
 .history-item.rtl {
@@ -492,33 +507,30 @@ body.busy::before {
 }
 
 .dark-mode .message-box-content {
-  background: #31363d;
-  border-color: #444c56;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  background: #2b2f36;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .dark-mode .message-box-content p {
-  color: #e0e0e0;
+  color: #e8eaed;
 }
 
 .dark-mode .message-box-content button {
-  background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+  background: #4a9eff;
 }
 
 .dark-mode .message-box-content button:hover {
-  background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+  background: #357abd;
 }
 
 .dark-mode .message-box-content button:last-child:not(:only-child) {
-  background: #2b2f36;
-  color: #9aa0a6;
-  border-color: #444c56;
+  background: #3e444b;
+  color: #e8eaed;
 }
 
 .dark-mode .message-box-content button:last-child:not(:only-child):hover {
-  background: #3e444b;
-  color: #e0e0e0;
-  border-color: #5f6368;
+  background: #4a5159;
+  color: #fff;
 }
 
 .dark-mode label {
@@ -548,30 +560,14 @@ body.busy::before {
   box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
 }
 
-.dark-mode .message-box {
-  background-color: rgba(0, 0, 0, 0.5);
-}
-
-.dark-mode .message-box-content p {
-  color: #e0e0e0;
-}
-
-.dark-mode .message-box-content button {
-  background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
-}
-
-.dark-mode .message-box-content button:hover {
-  background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
-}
-
 .dark-mode .credit {
-  color: #e8eaed;
-  border-color: #444c56;
+  color: #9aa0a6;
+  border-color: #5f6368;
 }
 
 .dark-mode .credit a {
   color: #8ab4f8;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .dark-mode .credit a:hover {
@@ -579,7 +575,14 @@ body.busy::before {
 }
 
 .dark-mode .shortcut-hint {
+  color: #bdc1c6;
+}
+
+.dark-mode .shortcut-hint kbd {
+  background: #3e444b;
+  border-color: #5f6368;
   color: #e8eaed;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .dark-mode .history-item {
