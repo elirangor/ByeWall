@@ -14,7 +14,7 @@
 
 | Light Mode | Dark Mode |
 |------------|-----------|
-| <img src="assets/screenshot-light.png" height="500"> | <img src="assets/screenshot-dark.png" height="500"> |
+| <img src="docs\screenshots\screenshot-light.png" height="500"> | <img src="docs\screenshots\screenshot-dark.png" height="500"> |
 
 
 ## 🔧 Installation
