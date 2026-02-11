@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2
+
+- **Smooth history clearing with undo**: Replaced jarring instant-clear with elegant staggered fade-out animation (50ms cascade), non-intrusive toast notifications, and a 5-second undo window to recover accidentally cleared history - making the action both delightful and forgiving
+- **Harmonized keyboard shortcuts design**: Completely redesigned shortcuts section with minimal transparent container, subtle divider lines, and flat key styling that blends seamlessly with the popup's visual hierarchy instead of competing for attention - creating proper information priority where shortcuts feel like reference info rather than a primary feature
+
+
+
 ## v2.1
 
 - **Dynamic relative timestamps**: History items now show human-friendly time indicators ("Just now", "15 mins ago", "3 hours ago", "2 days ago") alongside absolute timestamps for items under 7 days old, providing both context and precision at a glance

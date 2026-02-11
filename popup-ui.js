@@ -251,7 +251,7 @@ export function getCurrentTabInfo() {
 }
 
 /**
- * Update keyboard shortcut hints dynamically with modern styling
+ * Update keyboard shortcut hints with horizontal layout
  */
 export function updateShortcutHints(formatShortcut) {
   const container = document.getElementById('shortcut-hint');
@@ -261,21 +261,19 @@ export function updateShortcutHints(formatShortcut) {
     const openCmd = commands.find((c) => c.name === 'open_extension');
     const archiveCmd = commands.find((c) => c.name === 'archive_current');
 
-    // Create modern shortcut display
+    // Create horizontal keyboard shortcuts display
     container.innerHTML = `
-      <div class="shortcut-hint-title">
-        <span>⌨️</span>
-        <span>Keyboard Shortcuts</span>
-      </div>
-      <div class="shortcut-item">
-        <span class="shortcut-description">Launch Page Rewind</span>
-        <div class="shortcut-keys" id="shortcut1">${
+      <div class="shortcut-row">
+        <span class="shortcut-icon">⌨️</span>
+        <span class="shortcut-label">Launch Page Rewind</span>
+        <div class="shortcut-keys">${
           openCmd?.shortcut ? formatShortcut(openCmd.shortcut) : '<kbd>Not set</kbd>'
         }</div>
       </div>
-      <div class="shortcut-item">
-        <span class="shortcut-description">Open latest snapshot</span>
-        <div class="shortcut-keys" id="shortcut2">${
+      <div class="shortcut-row">
+        <span class="shortcut-icon">⌨️</span>
+        <span class="shortcut-label">Open Latest Snapshot</span>
+        <div class="shortcut-keys">${
           archiveCmd?.shortcut ? formatShortcut(archiveCmd.shortcut) : '<kbd>Not set</kbd>'
         }</div>
       </div>
