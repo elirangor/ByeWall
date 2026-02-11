@@ -8,6 +8,7 @@ import {
   renderHistory,
   showMessageBox,
   showConfirmBox,
+  showToast,
   hideMessageBox,
   getCurrentTabInfo,
   updateShortcutHints,
@@ -73,14 +74,69 @@ async function showPendingMessageIfAny() {
 }
 
 /* ============================================================================
- * Clear history with confirmation
+ * Clear history with smooth animation and undo
  * ==========================================================================*/
+let recentlyClearedHistory = null;
+let undoTimeoutId = null;
+
 async function handleClearHistory() {
-  showConfirmBox('Are you sure you want to clear all archive history?', async () => {
+  // Get current history before clearing
+  const currentHistory = await getHistory();
+  
+  if (!currentHistory || currentHistory.length === 0) {
+    showToast('No history to clear', { type: 'default', duration: 2000 });
+    return;
+  }
+  
+  // Clear any existing undo timeout
+  if (undoTimeoutId) {
+    clearTimeout(undoTimeoutId);
+    undoTimeoutId = null;
+  }
+  
+  // Store for potential undo (create a deep copy)
+  recentlyClearedHistory = JSON.parse(JSON.stringify(currentHistory));
+  
+  // Animate history items out
+  const historyItems = document.querySelectorAll('.history-item');
+  historyItems.forEach((item, index) => {
+    setTimeout(() => {
+      item.classList.add('removing');
+    }, index * 50); // Stagger the animation
+  });
+  
+  // Wait for animation to complete, then clear
+  setTimeout(async () => {
     await clearHistory();
     await loadHistory();
-    showMessageBox('History cleared successfully.');
-  });
+    
+    // Show success toast with undo option
+    showToast('History cleared', {
+      type: 'success',
+      duration: 5000,
+      onUndo: async () => {
+        if (recentlyClearedHistory && recentlyClearedHistory.length > 0) {
+          // Restore history by setting the storage directly
+          await setStorage(STORAGE_KEYS.ARCHIVE_HISTORY, recentlyClearedHistory);
+          await loadHistory();
+          showToast('History restored', { type: 'success', duration: 2000 });
+          
+          // Clear the timeout since undo was used
+          if (undoTimeoutId) {
+            clearTimeout(undoTimeoutId);
+            undoTimeoutId = null;
+          }
+          recentlyClearedHistory = null;
+        }
+      }
+    });
+    
+    // Clear the undo buffer after toast duration
+    undoTimeoutId = setTimeout(() => {
+      recentlyClearedHistory = null;
+      undoTimeoutId = null;
+    }, 5000);
+  }, historyItems.length * 50 + 500);
 }
 
 /* ============================================================================
@@ -220,24 +276,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (archiveBtn) archiveBtn.addEventListener('click', doArchive);
 
-  // Clear history button
+  // Clear history button with new smooth animation
   const clearBtn = document.getElementById('clearHistory');
   if (clearBtn) clearBtn.addEventListener('click', handleClearHistory);
 
-  // Dynamic shortcut hints with kbd tags
+  // Dynamic shortcut hints with modern styling
   updateShortcutHints((shortcut) => {
     if (!shortcut) return '';
-    // Wrap each key in a <kbd> tag
-    return shortcut
-      .split('+')
-      .map(key => {
-        const formatted = key
-          .replace('Command', '⌘')
-          .replace('Ctrl', 'Ctrl')
-          .replace('Alt', 'Alt')
-          .replace('Shift', 'Shift');
-        return `<kbd>${formatted}</kbd>`;
-      })
-      .join('+');
+    // Split by + and wrap each key
+    const keys = shortcut.split('+').map(key => {
+      const formatted = key
+        .replace('Command', '⌘')
+        .replace('Ctrl', 'Ctrl')
+        .replace('Alt', 'Alt')
+        .replace('Shift', '⇧');
+      return `<kbd>${formatted}</kbd>`;
+    });
+    // Join with styled plus sign
+    return keys.join('<span class="shortcut-plus">+</span>');
   });
 });

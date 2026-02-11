@@ -53,7 +53,7 @@ function formatHistoryDate(timestamp) {
 }
 
 /**
- * Render history items to the DOM
+ * Render history items to the DOM with smooth transitions
  */
 export function renderHistory(historyItems) {
   const list = document.getElementById('historyList');
@@ -63,11 +63,21 @@ export function renderHistory(historyItems) {
   list.innerHTML = '';
   
   if (!historyItems.length) {
-    section.style.display = 'none';
+    // Smooth hide animation
+    section.classList.add('hiding');
+    section.classList.remove('showing');
+    setTimeout(() => {
+      section.style.display = 'none';
+    }, 300); // Match transition duration
     return;
   }
 
+  // Show section with smooth animation
   section.style.display = 'block';
+  // Force reflow
+  section.offsetHeight;
+  section.classList.remove('hiding');
+  section.classList.add('showing');
   
   historyItems.forEach((item) => {
     const li = document.createElement('li');
@@ -109,6 +119,49 @@ export function renderHistory(historyItems) {
     li.appendChild(a);
     list.appendChild(li);
   });
+}
+
+/**
+ * Show toast notification with optional undo button
+ */
+export function showToast(message, options = {}) {
+  const { type = 'default', duration = 3000, onUndo = null } = options;
+  
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  const messageSpan = document.createElement('span');
+  messageSpan.textContent = message;
+  toast.appendChild(messageSpan);
+  
+  if (onUndo) {
+    const undoBtn = document.createElement('button');
+    undoBtn.textContent = 'Undo';
+    undoBtn.onclick = () => {
+      onUndo();
+      toast.remove();
+    };
+    toast.appendChild(undoBtn);
+  }
+  
+  document.body.appendChild(toast);
+  
+  // Trigger animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+  
+  // Auto remove after duration
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
 }
 
 /**
@@ -198,23 +251,34 @@ export function getCurrentTabInfo() {
 }
 
 /**
- * Update keyboard shortcut hints dynamically
+ * Update keyboard shortcut hints dynamically with modern styling
  */
 export function updateShortcutHints(formatShortcut) {
-  const s1 = document.getElementById('shortcut1');
-  const s2 = document.getElementById('shortcut2');
-  if (!s1 || !s2) return;
+  const container = document.getElementById('shortcut-hint');
+  if (!container) return;
 
   chrome.commands.getAll((commands) => {
     const openCmd = commands.find((c) => c.name === 'open_extension');
     const archiveCmd = commands.find((c) => c.name === 'archive_current');
 
-    s1.innerHTML = openCmd?.shortcut
-      ? formatShortcut(openCmd.shortcut)
-      : 'Not set';
-
-    s2.innerHTML = archiveCmd?.shortcut
-      ? formatShortcut(archiveCmd.shortcut)
-      : 'Not set';
+    // Create modern shortcut display
+    container.innerHTML = `
+      <div class="shortcut-hint-title">
+        <span>⌨️</span>
+        <span>Keyboard Shortcuts</span>
+      </div>
+      <div class="shortcut-item">
+        <span class="shortcut-description">Launch Page Rewind</span>
+        <div class="shortcut-keys" id="shortcut1">${
+          openCmd?.shortcut ? formatShortcut(openCmd.shortcut) : '<kbd>Not set</kbd>'
+        }</div>
+      </div>
+      <div class="shortcut-item">
+        <span class="shortcut-description">Open latest snapshot</span>
+        <div class="shortcut-keys" id="shortcut2">${
+          archiveCmd?.shortcut ? formatShortcut(archiveCmd.shortcut) : '<kbd>Not set</kbd>'
+        }</div>
+      </div>
+    `;
   });
 }
