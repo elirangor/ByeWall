@@ -7,13 +7,9 @@ import {
   STORAGE_KEYS,
   ARCHIVE_URLS,
   ERROR_CODES,
-} from './constants.js';
-import {
-  isValidUrl,
-  isUnsupportedUrl,
-  getStorage,
-} from '../utils/utils.js';
-import { saveToHistory } from '../storage/history-manager.js';
+} from "./constants.js";
+import { isValidUrl, isUnsupportedUrl, getStorage } from "../utils/utils.js";
+import { saveToHistory } from "../storage/history-manager.js";
 
 /* ---------- Archive.today precheck (HERMETIC) ---------- */
 /**
@@ -24,10 +20,10 @@ import { saveToHistory } from '../storage/history-manager.js';
  */
 export async function precheckArchiveToday(
   targetUrl,
-  timeoutMs = TIMEOUTS.ARCHIVE_TODAY_PRECHECK
+  timeoutMs = TIMEOUTS.ARCHIVE_TODAY_PRECHECK,
 ) {
   if (!/^https?:\/\//i.test(targetUrl)) {
-    return { ok: true, hasSnapshot: false, reason: 'unsupported' };
+    return { ok: true, hasSnapshot: false, reason: "unsupported" };
   }
 
   const checkedUrl = `${ARCHIVE_URLS.ARCHIVE_TODAY_BASE}${ARCHIVE_URLS.ARCHIVE_TODAY_NEWEST}${targetUrl}`;
@@ -37,17 +33,17 @@ export async function precheckArchiveToday(
   try {
     const resp = await fetch(checkedUrl, {
       signal: ctrl.signal,
-      redirect: 'follow',
-      cache: 'no-store',
-      credentials: 'omit',
-      headers: { Accept: 'text/html' },
+      redirect: "follow",
+      cache: "no-store",
+      credentials: "omit",
+      headers: { Accept: "text/html" },
     });
 
     if (resp.status === 404) {
       return {
         ok: true,
         hasSnapshot: false,
-        reason: 'not-found',
+        reason: "not-found",
         checkedUrl,
         finalUrl: resp.url || checkedUrl,
       };
@@ -56,11 +52,11 @@ export async function precheckArchiveToday(
     const finalUrl = resp.url || checkedUrl;
 
     // If we're still on /newest/ => hermetically treat as "no snapshot"
-    if (finalUrl.includes('/' + ARCHIVE_URLS.ARCHIVE_TODAY_NEWEST)) {
+    if (finalUrl.includes("/" + ARCHIVE_URLS.ARCHIVE_TODAY_NEWEST)) {
       return {
         ok: true,
         hasSnapshot: false,
-        reason: 'no-redirect',
+        reason: "no-redirect",
         checkedUrl,
         finalUrl,
       };
@@ -69,7 +65,7 @@ export async function precheckArchiveToday(
     // Redirected away from /newest/ => snapshot exists
     return { ok: true, hasSnapshot: true, checkedUrl, finalUrl };
   } catch (err) {
-    if (err?.name === 'AbortError') {
+    if (err?.name === "AbortError") {
       return { ok: false, error: ERROR_CODES.ARCHIVE_TODAY_TIMEOUT };
     }
     return { ok: false, error: ERROR_CODES.NETWORK_ERROR };
@@ -81,7 +77,7 @@ export async function precheckArchiveToday(
 /* ---------- Wayback quick precheck (fast) ---------- */
 export async function waybackHasSnapshotQuick(
   url,
-  timeoutMs = TIMEOUTS.WAYBACK_PRECHECK
+  timeoutMs = TIMEOUTS.WAYBACK_PRECHECK,
 ) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
@@ -89,10 +85,10 @@ export async function waybackHasSnapshotQuick(
     const availUrl = `${ARCHIVE_URLS.WAYBACK_AVAILABLE}?url=${encodeURIComponent(url)}`;
     const resp = await fetch(availUrl, {
       signal: ctrl.signal,
-      headers: { Accept: 'application/json' },
-      cache: 'no-store',
-      redirect: 'follow',
-      credentials: 'omit',
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      redirect: "follow",
+      credentials: "omit",
     });
     clearTimeout(timer);
     if (!resp.ok) return false;
@@ -112,16 +108,16 @@ async function getLatestWaybackSnapshot(url) {
 
   try {
     const cdxUrl = `${ARCHIVE_URLS.WAYBACK_CDX}?url=${encodeURIComponent(
-      url
+      url,
     )}&limit=1&sort=reverse`;
     const cdxResp = await fetch(cdxUrl, {
       signal: ctrl.signal,
-      headers: { Accept: 'text/plain' },
+      headers: { Accept: "text/plain" },
     });
     if (cdxResp.ok) {
       const text = (await cdxResp.text()).trim();
-      const line = text.split('\n')[0] || '';
-      const parts = line.split(' ');
+      const line = text.split("\n")[0] || "";
+      const parts = line.split(" ");
       if (parts.length >= 2) {
         const ts = parts[1];
         clearTimeout(timer);
@@ -132,7 +128,7 @@ async function getLatestWaybackSnapshot(url) {
     const availUrl = `${ARCHIVE_URLS.WAYBACK_AVAILABLE}?url=${encodeURIComponent(url)}`;
     const availResp = await fetch(availUrl, {
       signal: ctrl.signal,
-      headers: { Accept: 'application/json' },
+      headers: { Accept: "application/json" },
     });
     clearTimeout(timer);
     if (!availResp.ok) throw new Error(`HTTP ${availResp.status}`);
@@ -149,8 +145,8 @@ async function getLatestWaybackSnapshot(url) {
 /* ---------- The single action used by popup & shortcuts ---------- */
 export async function performArchive() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const url = tab?.url || '';
-  const title = tab?.title || '';
+  const url = tab?.url || "";
+  const title = tab?.title || "";
   const currentTabId = tab?.id;
 
   if (!isValidUrl(url)) {
@@ -161,9 +157,13 @@ export async function performArchive() {
   }
 
   const {
-    [STORAGE_KEYS.SELECTED_SERVICE]: selectedArchiveServicePref = SERVICES.ARCHIVE_TODAY,
+    [STORAGE_KEYS.SELECTED_SERVICE]:
+      selectedArchiveServicePref = SERVICES.ARCHIVE_TODAY,
     [STORAGE_KEYS.OPEN_IN_NEW_TAB]: openInNewTab = true,
-  } = await getStorage([STORAGE_KEYS.SELECTED_SERVICE, STORAGE_KEYS.OPEN_IN_NEW_TAB]);
+  } = await getStorage([
+    STORAGE_KEYS.SELECTED_SERVICE,
+    STORAGE_KEYS.OPEN_IN_NEW_TAB,
+  ]);
 
   let archiveUrl = null;
 
@@ -173,8 +173,13 @@ export async function performArchive() {
 
     // Retry once on timeout (common on first keyboard shortcut attempt)
     if (!pre.ok && pre.error === ERROR_CODES.ARCHIVE_TODAY_TIMEOUT) {
-      console.log('[ByeWall] Archive.Today timeout on first attempt, retrying with longer timeout...');
-      pre = await precheckArchiveToday(url, TIMEOUTS.ARCHIVE_TODAY_PRECHECK + TIMEOUTS.ARCHIVE_TODAY_RETRY_EXTRA);
+      console.log(
+        "[ByeWall] Archive.Today timeout on first attempt, retrying with longer timeout...",
+      );
+      pre = await precheckArchiveToday(
+        url,
+        TIMEOUTS.ARCHIVE_TODAY_PRECHECK + TIMEOUTS.ARCHIVE_TODAY_RETRY_EXTRA,
+      );
     }
 
     if (!pre.ok) {
@@ -201,11 +206,15 @@ export async function performArchive() {
     }
     try {
       archiveUrl = await getLatestWaybackSnapshot(url);
-      if (!archiveUrl) return { ok: false, error: ERROR_CODES.NO_SNAPSHOT_WAYBACK };
+      if (!archiveUrl)
+        return { ok: false, error: ERROR_CODES.NO_SNAPSHOT_WAYBACK };
     } catch (e) {
       return {
         ok: false,
-        error: e?.name === 'AbortError' ? ERROR_CODES.WAYBACK_TIMEOUT : ERROR_CODES.WAYBACK_ERROR,
+        error:
+          e?.name === "AbortError"
+            ? ERROR_CODES.WAYBACK_TIMEOUT
+            : ERROR_CODES.WAYBACK_ERROR,
       };
     }
   }
@@ -214,7 +223,7 @@ export async function performArchive() {
     title,
     url,
     SERVICE_NAMES[selectedArchiveServicePref],
-    archiveUrl
+    archiveUrl,
   );
 
   // Handle tab opening based on user preference
@@ -229,13 +238,13 @@ export async function performArchive() {
       await chrome.scripting.executeScript({
         target: { tabId: currentTabId },
         func: (archiveUrl) => {
-          window.history.pushState(null, '', window.location.href);
+          window.history.pushState(null, "", window.location.href);
           window.location.href = archiveUrl;
         },
         args: [archiveUrl],
       });
     } catch (err) {
-      console.warn('Failed to use history navigation, falling back:', err);
+      console.warn("Failed to use history navigation, falling back:", err);
       await chrome.tabs.update(currentTabId, { url: archiveUrl });
     }
   }

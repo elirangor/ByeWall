@@ -27,8 +27,8 @@
   "commands": {
     "open_extension": {
       "suggested_key": {
-        "default": "Ctrl+Shift+Q",
-        "mac": "Command+Shift+Q"
+        "default": "Ctrl+Shift+E",
+        "mac": "Command+Shift+E"
       },
       "description": "Open the Page Rewind popup"
     },
