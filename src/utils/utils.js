@@ -1,6 +1,6 @@
 // utils.js — shared utility functions
 
-import { TRACKING_PARAMS, UNSUPPORTED_PREFIXES } from '../core/constants.js';
+import { TRACKING_PARAMS, UNSUPPORTED_PREFIXES } from "../core/constants.js";
 
 /* ---------- Storage helpers ---------- */
 export const getStorage = (key) =>
@@ -13,7 +13,7 @@ export const setStorage = (key, val) =>
 export function isValidUrl(url) {
   try {
     const u = new URL(url);
-    return u.protocol === 'http:' || u.protocol === 'https:';
+    return u.protocol === "http:" || u.protocol === "https:";
   } catch {
     return false;
   }
@@ -27,23 +27,23 @@ export function isUnsupportedUrl(url) {
 export function normalizeHistoryUrl(raw) {
   try {
     const u = new URL(raw);
-    u.hash = '';
+    u.hash = "";
     u.hostname = u.hostname.toLowerCase();
-    
+
     TRACKING_PARAMS.forEach((k) => u.searchParams.delete(k));
-    
+
     const qs = u.searchParams.toString();
-    u.search = qs ? '?' + qs : '';
-    
-    const clean = u.pathname.replace(/\/+$/, '');
-    u.pathname = clean || '/';
-    
+    u.search = qs ? "?" + qs : "";
+
+    const clean = u.pathname.replace(/\/+$/, "");
+    u.pathname = clean || "/";
+
     if (
-      (u.protocol === 'https:' && u.port === '443') ||
-      (u.protocol === 'http:' && u.port === '80')
+      (u.protocol === "https:" && u.port === "443") ||
+      (u.protocol === "http:" && u.port === "80")
     )
-      u.port = '';
-    
+      u.port = "";
+
     return u.toString();
   } catch {
     return raw;
@@ -63,8 +63,8 @@ export const debounce = (fn, wait) => {
 
 /* ---------- Keyboard shortcut formatting ---------- */
 export function formatShortcut(s) {
-  if (!s) return '';
+  if (!s) return "";
   // Normalize Command to Cmd for consistency
   // Keep the keys separated by + so each gets its own <kbd> box
-  return s.replaceAll('Command', 'Cmd');
+  return s.replaceAll("Command", "Cmd");
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.1
+
+- **Improved keyboard shortcut display**: Shortcuts now show with symbols (⌘, ⇧, ⌥) for a more native look on both Mac and Windows. Mac shortcuts are automatically reordered to follow platform conventions (Cmd > Ctrl > Alt > Shift > Key).
+- **Code refactoring**: Reorganized popup.js into modular structure for better maintainability. Main file reduced from 386 to 52 lines, with logic split into focused modules (precheck, history, shortcuts, ui-handlers, pending-messages).
+
 ## v2.2
 
 - **Smooth history clearing with undo**: Added elegant staggered fade-out animation with toast notifications and a 5-second undo window to recover accidentally cleared history

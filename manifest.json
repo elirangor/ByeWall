@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Page Rewind",
-  "version": "2.2.1",
+  "version": "2.2",
   "description": "Open archived versions of web pages using Archive.today or the Wayback Machine.",
   "action": {
     "default_title": "Page Rewind",
