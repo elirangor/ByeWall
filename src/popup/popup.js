@@ -1,9 +1,9 @@
 /* popup.js – main popup logic */
 
-import { SERVICES, STORAGE_KEYS, HISTORY_CONFIG } from './constants.js';
-import { getStorage, setStorage, debounce, formatShortcut } from './utils.js';
-import { getHistory, clearHistory } from './history-manager.js';
-import { messageFromErrorCode } from './error-messages.js';
+import { SERVICES, STORAGE_KEYS, HISTORY_CONFIG } from '../core/constants.js';
+import { getStorage, setStorage, debounce, formatShortcut } from '../utils/utils.js';
+import { getHistory, clearHistory } from '../storage/history-manager.js';
+import { messageFromErrorCode } from '../core/error-messages.js';
 import {
   renderHistory,
   showMessageBox,
@@ -12,7 +12,7 @@ import {
   hideMessageBox,
   getCurrentTabInfo,
   updateShortcutHints,
-} from './popup-ui.js';
+} from '../ui/popup-ui.js';
 
 /* ============================================================================
  * Precheck functions (communicate with background)

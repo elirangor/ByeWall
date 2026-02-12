@@ -1,7 +1,7 @@
 // history-manager.js — archive history management
 
-import { STORAGE_KEYS, HISTORY_CONFIG } from './constants.js';
-import { normalizeHistoryUrl, getStorage, setStorage } from './utils.js';
+import { STORAGE_KEYS, HISTORY_CONFIG } from '../core/constants.js';
+import { normalizeHistoryUrl, getStorage, setStorage } from '../utils/utils.js';
 
 /**
  * Save an archive entry to history

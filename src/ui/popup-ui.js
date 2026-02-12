@@ -1,6 +1,6 @@
 // popup-ui.js — UI rendering and interaction logic
 
-import { isRTL } from './utils.js';
+import { isRTL } from '../utils/utils.js';
 
 /**
  * Format date for history display with dynamic relative time + absolute timestamp

@@ -12,8 +12,8 @@ import {
   isValidUrl,
   isUnsupportedUrl,
   getStorage,
-} from './utils.js';
-import { saveToHistory } from './history-manager.js';
+} from '../utils/utils.js';
+import { saveToHistory } from '../storage/history-manager.js';
 
 /* ---------- Archive.today precheck (HERMETIC) ---------- */
 /**

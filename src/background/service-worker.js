@@ -1,12 +1,11 @@
-// background.js — MV3 module glue: messages + keyboard shortcuts
-
+// src/background/service-worker.js
 import {
   performArchive,
   precheckArchiveToday,
   waybackHasSnapshotQuick,
-} from './archive-core.js';
-import { STORAGE_KEYS, ERROR_CODES } from './constants.js';
-import { setStorage } from './utils.js';
+} from '../core/archive-core.js';
+import { STORAGE_KEYS, ERROR_CODES } from '../core/constants.js';
+import { setStorage } from '../utils/utils.js';
 
 // Messages from popup
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {

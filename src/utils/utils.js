@@ -1,6 +1,6 @@
 // utils.js — shared utility functions
 
-import { TRACKING_PARAMS, UNSUPPORTED_PREFIXES } from './constants.js';
+import { TRACKING_PARAMS, UNSUPPORTED_PREFIXES } from '../core/constants.js';
 
 /* ---------- Storage helpers ---------- */
 export const getStorage = (key) =>
