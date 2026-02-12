@@ -306,20 +306,57 @@ document.addEventListener("DOMContentLoaded", () => {
   updateShortcutHints((shortcut) => {
     if (!shortcut) return "";
     
-    // First, normalize all symbols to text
-    let normalized = shortcut
-      .replace(/⌘/g, 'Cmd')
-      .replace(/⇧/g, 'Shift')
-      .replace(/⌥/g, 'Alt')
-      .replace(/⌃/g, 'Ctrl')
-      .replace(/Command/g, 'Cmd');
+    // Handle both formats: "Ctrl+Shift+E" (with +) and "ShiftCmdE" (Mac concatenated)
+    let keys;
     
-    // Split by + and wrap each key in its own <kbd> tag
-    const keys = normalized.split("+").map((key) => {
-      const trimmedKey = key.trim();
-      return `<kbd>${trimmedKey}</kbd>`;
-    });
+    if (shortcut.includes('+')) {
+      // Already has separators (Windows format)
+      keys = shortcut.split('+').map(k => k.trim());
+    } else {
+      // Mac concatenated format - need to split intelligently
+      // Possible keys: Shift, Cmd, Command, Ctrl, Alt, Option, and single letters
+      keys = [];
+      let remaining = shortcut;
+      
+      // Define patterns to match (order matters - longer matches first)
+      const patterns = [
+        { regex: /^Command/, replacement: 'Cmd' },
+        { regex: /^Shift/, replacement: 'Shift' },
+        { regex: /^Ctrl/, replacement: 'Ctrl' },
+        { regex: /^Cmd/, replacement: 'Cmd' },
+        { regex: /^Alt/, replacement: 'Alt' },
+        { regex: /^Option/, replacement: 'Alt' },
+        { regex: /^⌘/, replacement: 'Cmd' },
+        { regex: /^⇧/, replacement: 'Shift' },
+        { regex: /^⌃/, replacement: 'Ctrl' },
+        { regex: /^⌥/, replacement: 'Alt' },
+      ];
+      
+      while (remaining.length > 0) {
+        let matched = false;
+        
+        // Try to match modifier keys
+        for (const pattern of patterns) {
+          if (pattern.regex.test(remaining)) {
+            keys.push(pattern.replacement);
+            remaining = remaining.replace(pattern.regex, '');
+            matched = true;
+            break;
+          }
+        }
+        
+        // If no modifier matched, take the first character (the actual key)
+        if (!matched && remaining.length > 0) {
+          keys.push(remaining[0]);
+          remaining = remaining.slice(1);
+        }
+      }
+    }
+    
+    // Wrap each key in <kbd> tag
+    const kbdKeys = keys.map((key) => `<kbd>${key}</kbd>`);
+    
     // Join with styled plus sign
-    return keys.join('<span class="shortcut-plus">+</span>');
+    return kbdKeys.join('<span class="shortcut-plus">+</span>');
   });
 });
