@@ -9,9 +9,15 @@ src/
 │   └── service-worker.js
 ├── popup/              # Popup UI (HTML, CSS, JS)
 │   ├── popup.html
-│   ├── popup.js
+│   ├── popup.js        # Main coordinator (52 lines)
 │   ├── popup.css
-│   └── popup-early.js
+│   ├── popup-early.js
+│   └── modules/        # Modular popup components
+│       ├── precheck.js         # Archive precheck functions
+│       ├── history.js          # History loading & clearing
+│       ├── shortcuts.js        # Keyboard shortcut formatting
+│       ├── ui-handlers.js      # Event handlers & UI setup
+│       └── pending-messages.js # Pending message handling
 ├── core/               # Core business logic
 │   ├── archive-core.js
 │   ├── constants.js
@@ -97,12 +103,41 @@ And can find the same archived version.
 - Opens popup when shortcuts fail (shows error messages)
 - Command listener for instant archive operations
 
-**src/popup/popup.js** - UI logic
-- Dark mode toggle with localStorage persistence
-- Service preference management
-- History display with dynamic timestamps
-- Tab behavior control (new/same tab)
-- Warm pre-checking on popup open
+**src/popup/popup.js** - Main coordinator (52 lines)
+- Imports and initializes all popup modules
+- Coordinates the initialization sequence
+- Sets up event listeners
+- Minimal, focused on orchestration
+
+**src/popup/modules/precheck.js** - Archive precheck functions
+- `hasArchiveTodaySnapshotQuick()` - Check Archive.Today
+- `hasWaybackSnapshotQuick()` - Check Wayback Machine
+- `warmPrecheck()` - Warm up precheck on popup open
+
+**src/popup/modules/history.js** - History management
+- `loadHistory()` - Load and render history items
+- `handleClearHistory()` - Clear with smooth animation and undo
+- Undo buffer with 5-second window
+
+**src/popup/modules/shortcuts.js** - Keyboard shortcut formatting
+- `initializeShortcutHints()` - Format and display shortcuts
+- Intelligent parsing of Mac concatenated shortcuts (e.g., "ShiftCmdE")
+- Symbol conversion: ⌘, ⇧, ⌥
+- Automatic Mac key reordering
+
+**src/popup/modules/ui-handlers.js** - Event handlers and UI setup
+- `initializeFonts()` - CSP-safe font loading
+- `initializeModalClose()` - Modal close button
+- `initializeServiceSelection()` - Archive service radio buttons
+- `initializeTabBehavior()` - New tab vs same tab toggle
+- `initializeDarkMode()` - Dark mode toggle and persistence
+- `initializeWarmPrecheck()` - Warm up archive prechecks
+- `initializeArchiveButton()` - Main "Rewind This Page" button
+
+**src/popup/modules/pending-messages.js** - Pending message handling
+- `showPendingMessageIfAny()` - Display errors from keyboard shortcuts
+- 30-second message timeout
+- Automatic cleanup of stale messages
 
 **src/storage/history-manager.js** - History management
 - Save archive entries with deduplication
@@ -179,7 +214,8 @@ Instead of silent failures, users receive clear, actionable messages about what 
 - **Toast Notifications**: Non-intrusive feedback with undo actions
 - **Relative Timestamps**: Dynamic "X mins ago" updates in history
 - **RTL Support**: Proper text direction for Hebrew, Arabic content
-- **Keyboard Shortcuts**: Visual hints with platform-specific formatting
+- **Keyboard Shortcuts**: Visual hints with platform-specific symbols (⌘, ⇧, ⌥)
+- **Mac Shortcut Handling**: Intelligent parsing and reordering of concatenated Mac shortcuts
 
 ## Development
 
@@ -199,3 +235,4 @@ Instead of silent failures, users receive clear, actionable messages about what 
 - JSDoc comments for public functions
 - Small, focused functions with single responsibility
 - Consistent naming conventions
+- Modular architecture with clear separation of concerns
