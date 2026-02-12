@@ -1,5 +1,9 @@
 /* popup.css — styles for the popup interface */
 
+/* ============================================================================
+ * BASE STYLES (Light Mode Default)
+ * ==========================================================================*/
+
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: linear-gradient(135deg, #e8eaed 0%, #dfe1e5 100%);
@@ -8,6 +12,7 @@ body {
   margin: 0;
   box-sizing: border-box;
   transition: background 0.3s, color 0.3s;
+  color: #202124;
 }
 
 .header-container {
@@ -58,6 +63,7 @@ label:last-child {
   margin-bottom: 0;
 }
 
+/* Radio buttons */
 input[type="radio"] {
   -webkit-appearance: none;
   appearance: none;
@@ -96,6 +102,7 @@ input[type="radio"]:focus-visible {
   outline-offset: 2px;
 }
 
+/* Buttons */
 button {
   width: 100%;
   background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
@@ -124,6 +131,7 @@ button:disabled {
   box-shadow: none;
 }
 
+/* Footer */
 .credit {
   margin-top: 12px;
   font-size: 10px;
@@ -146,7 +154,7 @@ button:disabled {
   color: #1557b0;
 }
 
-/* Horizontal keyboard shortcuts layout */
+/* Keyboard shortcuts */
 .shortcut-hint {
   display: flex;
   flex-direction: column;
@@ -223,6 +231,7 @@ button:disabled {
   margin: 0 -1px;
 }
 
+/* Modal message box */
 .message-box {
   display: none;
   position: fixed;
@@ -662,103 +671,103 @@ body.busy::before {
 }
 
 /* ============================================================================
- * Dark mode styles
+ * DARK MODE OVERRIDES
  * ==========================================================================*/
 
-.dark-mode {
+body.dark-mode {
   background: linear-gradient(135deg, #1a1d23 0%, #26292e 100%);
   color: #e0e0e0;
 }
 
-.dark-mode h3,
-.dark-mode h4 {
+body.dark-mode h3,
+body.dark-mode h4 {
   color: #f0f0f0;
 }
 
-.dark-mode .options-section {
+body.dark-mode .options-section {
   background: #31363d;
   border-color: #444c56;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.dark-mode .message-box {
+body.dark-mode .message-box {
   background-color: rgba(0, 0, 0, 0.6);
 }
 
-.dark-mode .message-box-content {
+body.dark-mode .message-box-content {
   background: #2b2f36;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-.dark-mode .message-box-content p {
+body.dark-mode .message-box-content p {
   color: #e8eaed;
 }
 
-.dark-mode .message-box-content button {
+body.dark-mode .message-box-content button {
   background: #4a9eff;
 }
 
-.dark-mode .message-box-content button:hover {
+body.dark-mode .message-box-content button:hover {
   background: #357abd;
 }
 
-.dark-mode .message-box-content button:last-child:not(:only-child) {
+body.dark-mode .message-box-content button:last-child:not(:only-child) {
   background: #3e444b;
   color: #e8eaed;
 }
 
-.dark-mode .message-box-content button:last-child:not(:only-child):hover {
+body.dark-mode .message-box-content button:last-child:not(:only-child):hover {
   background: #4a5159;
   color: #fff;
 }
 
-.dark-mode label {
+body.dark-mode label {
   color: #e0e0e0;
 }
 
-.dark-mode input[type="radio"] {
+body.dark-mode input[type="radio"] {
   border-color: #6c757d;
   background: #2b2f36;
 }
 
-.dark-mode input[type="radio"]::before {
+body.dark-mode input[type="radio"]::before {
   background: #4a9eff;
 }
 
-.dark-mode input[type="radio"]:checked {
+body.dark-mode input[type="radio"]:checked {
   border-color: #4a9eff;
 }
 
-.dark-mode button {
+body.dark-mode button {
   background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
   box-shadow: 0 2px 6px rgba(74, 158, 255, 0.3);
 }
 
-.dark-mode button:hover:not(:disabled) {
+body.dark-mode button:hover:not(:disabled) {
   background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
   box-shadow: 0 4px 12px rgba(74, 158, 255, 0.4);
 }
 
-.dark-mode .credit {
+body.dark-mode .credit {
   color: #9aa0a6;
   border-color: #5f6368;
 }
 
-.dark-mode .credit a {
+body.dark-mode .credit a {
   color: #8ab4f8;
   font-weight: 500;
 }
 
-.dark-mode .credit a:hover {
+body.dark-mode .credit a:hover {
   color: #aecbfa;
 }
 
 /* Dark mode keyboard shortcuts */
-.dark-mode .shortcut-label {
+body.dark-mode .shortcut-label {
   color: #9aa0a6;
 }
 
-.dark-mode .shortcut-hint kbd {
+body.dark-mode .shortcut-hint kbd {
   background: linear-gradient(180deg, #3e444b 0%, #31363d 100%);
   border-color: #5f6368;
   border-bottom-color: #444c56;
@@ -767,103 +776,103 @@ body.busy::before {
               inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.dark-mode .shortcut-hint kbd:hover {
+body.dark-mode .shortcut-hint kbd:hover {
   border-color: #8ab4f8;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 
               inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.dark-mode .shortcut-hint kbd:active {
+body.dark-mode .shortcut-hint kbd:active {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 
               inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-.dark-mode .shortcut-plus {
+body.dark-mode .shortcut-plus {
   color: #6c757d;
 }
 
-.dark-mode .history-item {
+body.dark-mode .history-item {
   background: #31363d;
   border-color: #444c56;
   color: #e0e0e0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.dark-mode .history-item:hover {
+body.dark-mode .history-item:hover {
   background-color: #3e444b;
   border-color: #5f6368;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-.dark-mode .history-item-content .title {
+body.dark-mode .history-item-content .title {
   color: #e0e0e0;
 }
 
-.dark-mode .history-item-content .details .service {
+body.dark-mode .history-item-content .details .service {
   color: #8ab4f8;
   border-color: #8ab4f8;
   border-width: 1.5px;
 }
 
-.dark-mode .history-item:hover .history-item-content .details .service {
+body.dark-mode .history-item:hover .history-item-content .details .service {
   background: rgba(138, 180, 248, 0.15);
 }
 
-.dark-mode .history-item-content .details .timestamp {
+body.dark-mode .history-item-content .details .timestamp {
   color: #9aa0a6;
 }
 
-.dark-mode .tab-choice {
+body.dark-mode .tab-choice {
   background: #2b2f36;
   border-color: #444c56;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-.dark-mode .tab-option {
+body.dark-mode .tab-option {
   color: #9aa0a6;
   background: transparent;
 }
 
-.dark-mode .tab-option + .tab-option {
+body.dark-mode .tab-option + .tab-option {
   border-left: 1px solid #444c56;
 }
 
-.dark-mode .tab-option.active {
+body.dark-mode .tab-option.active {
   background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
   color: white;
   font-weight: 600;
   box-shadow: inset 0 2px 8px rgba(74, 158, 255, 0.2);
 }
 
-.dark-mode .tab-option:not(.active):hover {
+body.dark-mode .tab-option:not(.active):hover {
   background: #3e444b;
   color: #e0e0e0;
 }
 
-.dark-mode .clear-history-btn {
+body.dark-mode .clear-history-btn {
   color: #aab0b8;
   opacity: 1;
   background: none !important;
 }
 
-.dark-mode .clear-history-btn:hover:not(:disabled) {
+body.dark-mode .clear-history-btn:hover:not(:disabled) {
   color: #f28b82;
   background: none !important;
 }
 
-.dark-mode .clear-history-btn:focus,
-.dark-mode .clear-history-btn:active {
+body.dark-mode .clear-history-btn:focus,
+body.dark-mode .clear-history-btn:active {
   background: none !important;
 }
 
-.dark-mode.busy::before {
+body.dark-mode.busy::before {
   background: rgba(0, 0, 0, 0.35);
 }
 
-.dark-mode .toast {
+body.dark-mode .toast {
   background: #3e444b;
 }
 
-.dark-mode .toast.success {
+body.dark-mode .toast.success {
   background: linear-gradient(135deg, #2d8e47 0%, #1e7e34 100%);
 }
