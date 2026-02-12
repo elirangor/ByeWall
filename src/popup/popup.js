@@ -305,8 +305,17 @@ document.addEventListener("DOMContentLoaded", () => {
   // Fixed: Each key now gets its own <kbd> box
   updateShortcutHints((shortcut) => {
     if (!shortcut) return "";
+    
+    // First, normalize all symbols to text
+    let normalized = shortcut
+      .replace(/⌘/g, 'Cmd')
+      .replace(/⇧/g, 'Shift')
+      .replace(/⌥/g, 'Alt')
+      .replace(/⌃/g, 'Ctrl')
+      .replace(/Command/g, 'Cmd');
+    
     // Split by + and wrap each key in its own <kbd> tag
-    const keys = shortcut.split("+").map((key) => {
+    const keys = normalized.split("+").map((key) => {
       const trimmedKey = key.trim();
       return `<kbd>${trimmedKey}</kbd>`;
     });
