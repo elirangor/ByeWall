@@ -302,16 +302,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (clearBtn) clearBtn.addEventListener("click", handleClearHistory);
 
   // Dynamic shortcut hints with modern styling
+  // Fixed: Each key now gets its own <kbd> box
   updateShortcutHints((shortcut) => {
     if (!shortcut) return "";
-    // Split by + and wrap each key
+    // Split by + and wrap each key in its own <kbd> tag
     const keys = shortcut.split("+").map((key) => {
-      const formatted = key
-        .replace("Command", "⌘")
-        .replace("Ctrl", "Ctrl")
-        .replace("Alt", "Alt")
-        .replace("Shift", "⇧");
-      return `<kbd>${formatted}</kbd>`;
+      const trimmedKey = key.trim();
+      return `<kbd>${trimmedKey}</kbd>`;
     });
     // Join with styled plus sign
     return keys.join('<span class="shortcut-plus">+</span>');

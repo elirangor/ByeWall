@@ -64,9 +64,7 @@ export const debounce = (fn, wait) => {
 /* ---------- Keyboard shortcut formatting ---------- */
 export function formatShortcut(s) {
   if (!s) return '';
-  return s
-    .replaceAll('Command', '⌘')
-    .replaceAll('Ctrl', 'Ctrl')
-    .replaceAll('Alt', 'Alt')
-    .replaceAll('Shift', 'Shift');
+  // Normalize Command to Cmd for consistency
+  // Keep the keys separated by + so each gets its own <kbd> box
+  return s.replaceAll('Command', 'Cmd');
 }

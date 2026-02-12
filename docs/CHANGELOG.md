@@ -1,7 +1,5 @@
 # Changelog
 
-# Changelog
-
 ## v2.2
 
 - **Smooth history clearing with undo**: Added elegant staggered fade-out animation with toast notifications and a 5-second undo window to recover accidentally cleared history
