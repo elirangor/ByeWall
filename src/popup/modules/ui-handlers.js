@@ -84,7 +84,7 @@ export async function initializeTabBehavior() {
 }
 
 /**
- * Initialize dark mode toggle
+ * Initialize dark mode toggle - applies to html element
  */
 export async function initializeDarkMode() {
   const { [STORAGE_KEYS.DARK_MODE]: darkModeEnabled } = await getStorage(
@@ -93,14 +93,26 @@ export async function initializeDarkMode() {
 
   const toggle = document.getElementById("darkModeToggle");
 
+  // Set initial state SYNCHRONOUSLY before enabling transitions
   if (darkModeEnabled) {
-    document.body.classList.add("dark-mode");
-    if (toggle) toggle.checked = true;
+    document.documentElement.classList.add("dark-mode");
+    if (toggle) {
+      toggle.checked = true;
+      // Force a reflow to ensure the checked state is applied immediately
+      toggle.offsetHeight;
+    }
   }
+
+  // Enable transitions AFTER initial state is set
+  // Use setTimeout to ensure it happens after the current render frame
+  setTimeout(() => {
+    document.body.classList.add("loaded");
+  }, 50); // Small delay to ensure toggle is fully rendered in checked state
 
   if (toggle) {
     toggle.addEventListener("change", () => {
-      document.body.classList.toggle("dark-mode", toggle.checked);
+      // Apply to html element for instant effect
+      document.documentElement.classList.toggle("dark-mode", toggle.checked);
       setStorage(STORAGE_KEYS.DARK_MODE, toggle.checked);
       try {
         localStorage.setItem(STORAGE_KEYS.DARK_MODE, String(toggle.checked));

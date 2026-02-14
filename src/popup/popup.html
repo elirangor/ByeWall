@@ -2,10 +2,12 @@
 <html lang="en">
 
 <head>
-  <!-- Run before paint (CSP-safe): sets dark mode instantly -->
-  <script src="popup-early.js"></script>
-
   <meta charset="UTF-8" />
+  
+  <!-- Critical: Load dark mode script before anything else renders -->
+  <link rel="preload" href="popup-early.js" as="script">
+  <script src="popup-early.js"></script>
+  
   <meta name="color-scheme" content="dark light">
   <title>Archive Article</title>
 

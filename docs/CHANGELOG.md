@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.3
+
+- **Fixed dark mode flash on popup open**: Eliminated the brief light-to-dark transition when opening the popup in dark mode. Dark mode now applies instantly to the HTML element before first paint, with no visible flash or Content Security Policy violations. Toggle animations still work smoothly when manually switching modes.
+
 ## v2.2.2
 
 - **Individual history item deletion**: Added hover-revealed delete button (×) centered in the metadata line for each history item. Allows deletion of specific archived pages without clearing entire history. Features smooth fade-in on hover, bright red color indication, 5-second undo window with toast notification, and stable positioning with no jumping or unwanted animations.
