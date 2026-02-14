@@ -20,7 +20,6 @@
 - **Restructured project architecture**: Reorganized codebase into professional directory structure (`src/background`, `src/popup`, `src/core`, `src/utils`, `src/storage`, `src/ui`) for improved maintainability and scalability
 
 
-
 ## v2.1
 
 - **Dynamic relative timestamps**: History items now show human-friendly time indicators ("Just now", "15 mins ago", "3 hours ago", "2 days ago") alongside absolute timestamps for items under 7 days old, providing both context and precision at a glance
@@ -29,7 +28,6 @@
 - **RTL text support improvements**: Fixed timestamp positioning for right-to-left languages (Hebrew, Arabic) to ensure consistent right-aligned placement regardless of content direction
 - **Simplified error message design**: Redesigned modal dialogs with cleaner, more focused styling - removed excessive blur effects, animations, and visual noise for a more professional and accessible error presentation
 - **Message box width optimization**: Reduced error dialog width from 85% to 70% for better visual balance and less intrusive presentation within the popup interface
-
 
 ## v2.0
 

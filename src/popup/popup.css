@@ -323,7 +323,7 @@ button:disabled {
   color: #202124;
 }
 
-/* Toggle switch */
+/* Toggle switch - Enhanced UX */
 .toggle-container {
   display: flex;
   justify-content: flex-end;
@@ -332,8 +332,8 @@ button:disabled {
 .toggle-switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 20px;
+  width: 52px;
+  height: 28px;
 }
 
 .toggle-switch input {
@@ -346,40 +346,67 @@ button:disabled {
   position: absolute;
   cursor: pointer;
   inset: 0;
-  background-color: #5f6368;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #5f6368 0%, #4a5157 100%);
+  border-radius: 28px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
   /* No transition on initial load */
 }
 
 /* Enable transitions only after page loads */
 body.loaded .slider {
-  transition: 0.4s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Hover state */
+.slider:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15), 0 0 0 4px rgba(95, 99, 104, 0.1);
+}
+
+/* Focus state for accessibility */
+.toggle-switch input:focus-visible + .slider {
+  outline: 2px solid #1a73e8;
+  outline-offset: 2px;
+}
+
+/* Sun icon (light mode) */
 .slider:before {
-  content: "";
+  content: "☀️";
   position: absolute;
-  height: 16px;
-  width: 16px;
-  left: 2px;
-  bottom: 2px;
-  background: #fff;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
   /* No transition on initial load */
 }
 
 /* Enable transitions only after page loads */
 body.loaded .slider:before {
-  transition: 0.4s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Checked state - dark mode */
 input:checked + .slider {
-  background-color: #1a73e8;
+  background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+input:checked + .slider:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(26, 115, 232, 0.15);
+}
+
+/* Moon icon (dark mode) */
 input:checked + .slider:before {
-  transform: translateX(20px);
+  content: "🌙";
+  transform: translateX(24px);
+  background: linear-gradient(135deg, #2b2f36 0%, #1f2227 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* History items */
@@ -832,6 +859,35 @@ html.dark-mode .credit a {
 
 html.dark-mode .credit a:hover {
   color: #aecbfa;
+}
+
+/* Dark mode toggle enhancements */
+html.dark-mode .slider {
+  background: linear-gradient(135deg, #4a5157 0%, #3e444b 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+html.dark-mode .slider:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 0 0 4px rgba(74, 80, 87, 0.15);
+}
+
+html.dark-mode input:checked + .slider {
+  background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+html.dark-mode input:checked + .slider:hover {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(74, 158, 255, 0.2);
+}
+
+html.dark-mode .slider:before {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e8eaed 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+html.dark-mode input:checked + .slider:before {
+  background: linear-gradient(135deg, #2b2f36 0%, #1f2227 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 /* Dark mode keyboard shortcuts */
