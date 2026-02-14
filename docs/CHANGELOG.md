@@ -3,6 +3,7 @@
 ## v2.2.3
 
 - **Fixed dark mode flash on popup open**: Eliminated the brief light-to-dark transition when opening the popup in dark mode. Dark mode now applies instantly to the HTML element before first paint, with no visible flash or Content Security Policy violations. Toggle animations still work smoothly when manually switching modes.
+- **Improved dark mode toggle icons**: Replaced emoji icons with custom CSS-based sun and moon icons. Sun features a white center with bright orange rays for better visibility and smoother transitions between light and dark modes.
 
 ## v2.2.2
 
