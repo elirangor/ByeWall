@@ -5,6 +5,8 @@ import { setStorage } from "../../utils/utils.js";
 import {
   getHistory,
   clearHistory as clearHistoryStorage,
+  deleteHistoryItem,
+  restoreHistoryItem,
 } from "../../storage/history-manager.js";
 import { renderHistory, showToast } from "../../ui/popup-ui.js";
 
@@ -12,16 +14,83 @@ import { renderHistory, showToast } from "../../ui/popup-ui.js";
 let recentlyClearedHistory = null;
 let undoTimeoutId = null;
 
+// State for individual item deletion
+let recentlyDeletedItem = null;
+let recentlyDeletedIndex = null;
+let deleteUndoTimeoutId = null;
+
 /**
- * Load and render history items
+ * Load and render history items with delete handlers
  */
 export async function loadHistory() {
   const historyItems = await getHistory();
-  renderHistory(historyItems);
+  renderHistory(historyItems, handleDeleteItem);
 }
 
 /**
- * Clear history with smooth animation and undo support
+ * Handle deletion of a single history item
+ */
+async function handleDeleteItem(item, index) {
+  // Clear any existing delete undo timeout
+  if (deleteUndoTimeoutId) {
+    clearTimeout(deleteUndoTimeoutId);
+    deleteUndoTimeoutId = null;
+  }
+
+  // Store for potential undo
+  recentlyDeletedItem = JSON.parse(JSON.stringify(item));
+  recentlyDeletedIndex = index;
+
+  // Animate the item out
+  const historyList = document.getElementById("historyList");
+  if (historyList) {
+    const listItem = historyList.children[index];
+    if (listItem) {
+      const historyItem = listItem.querySelector(".history-item");
+      if (historyItem) {
+        historyItem.classList.add("removing");
+      }
+    }
+  }
+
+  // Wait for animation, then delete
+  setTimeout(async () => {
+    await deleteHistoryItem(index);
+    await loadHistory();
+
+    // Show success toast with undo option
+    showToast("Item deleted", {
+      type: "success",
+      duration: 5000,
+      onUndo: async () => {
+        if (recentlyDeletedItem && recentlyDeletedIndex !== null) {
+          // Restore the item
+          await restoreHistoryItem(recentlyDeletedItem, recentlyDeletedIndex);
+          await loadHistory();
+          showToast("Item restored", { type: "success", duration: 2000 });
+
+          // Clear the timeout since undo was used
+          if (deleteUndoTimeoutId) {
+            clearTimeout(deleteUndoTimeoutId);
+            deleteUndoTimeoutId = null;
+          }
+          recentlyDeletedItem = null;
+          recentlyDeletedIndex = null;
+        }
+      },
+    });
+
+    // Clear the undo buffer after toast duration
+    deleteUndoTimeoutId = setTimeout(() => {
+      recentlyDeletedItem = null;
+      recentlyDeletedIndex = null;
+      deleteUndoTimeoutId = null;
+    }, 5000);
+  }, 500); // Match animation duration
+}
+
+/**
+ * Clear all history with smooth animation and undo support
  */
 export async function handleClearHistory() {
   // Get current history before clearing

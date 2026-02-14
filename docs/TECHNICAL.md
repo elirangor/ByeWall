@@ -1,238 +1,180 @@
 # Technical Documentation
 
-## 🛠 Development Notes
+## 🛠 Project Structure
 
-### Project Structure
 ```
 src/
-├── background/         # Service worker and background scripts
-│   └── service-worker.js
-├── popup/              # Popup UI (HTML, CSS, JS)
-│   ├── popup.html
+├── background/         # Service worker - keyboard shortcuts, message passing
+├── popup/              # UI components
 │   ├── popup.js        # Main coordinator (52 lines)
 │   ├── popup.css
-│   ├── popup-early.js
-│   └── modules/        # Modular popup components
-│       ├── precheck.js         # Archive precheck functions
-│       ├── history.js          # History loading & clearing
-│       ├── shortcuts.js        # Keyboard shortcut formatting
-│       ├── ui-handlers.js      # Event handlers & UI setup
-│       └── pending-messages.js # Pending message handling
-├── core/               # Core business logic
-│   ├── archive-core.js
-│   ├── constants.js
-│   └── error-messages.js
-├── utils/              # Utility functions
-│   └── utils.js
-├── storage/            # Storage and history management
-│   └── history-manager.js
-└── ui/                 # UI rendering and components
-    └── popup-ui.js
+│   └── modules/        # Modular components (precheck, history, shortcuts, ui-handlers)
+├── core/               # Business logic (archive-core, constants, error-messages)
+├── utils/              # Shared utilities
+├── storage/            # History management
+└── ui/                 # UI rendering (popup-ui)
 ```
 
-- No external dependencies  
-- Modular ES6+ architecture
-- Simplified design focused on reliability and ease of use  
+**Philosophy:** Modular ES6+ architecture, no external dependencies, focused on reliability.
 
 ### Special thanks to [@8288tom](https://github.com/8288tom) for improving the history functionality.
 
-## 🔒 Security Features
-- URL validation and XSS protection
-- Rate limiting to prevent service abuse  
-- Secure external link handling
+---
 
 ## 🔐 Permissions
 
 - `https://archive.today/*`, `https://archive.ph/*` – Archive.today pre-checks  
 - `https://web.archive.org/*`, `https://archive.org/*` – Wayback lookups  
-- `tabs`, `activeTab`, `storage` – open result tab, read current URL, store prefs/history
-- `scripting` – enables "Same Tab" navigation feature
+- `tabs`, `activeTab`, `storage` – Tab management, URL reading, data persistence
+- `scripting` – Enables "Same Tab" navigation
 
-## 🔍 How It Decides to Open a Tab
+---
 
-### Archive.today Flow (with Smart Fallback):
-1. Background checks `archive.today/newest/<url>` with 3.5-second timeout
-2. **If pre-check succeeds and snapshot exists** → opens the archive
-3. **If pre-check fails (timeout/network error)** → retries once with extended timeout
-4. **If pre-check succeeds but "No results" found** → shows message in popup (no tab opened)
+## 🔍 Archive Decision Flow
 
-This means Archive.today will almost always attempt to work, even when the pre-check service is temporarily slow or unavailable.
+### Archive.today (with Smart Fallback)
+1. Pre-check `archive.today/newest/<url>` (3.5s timeout)
+2. **If exists** → open archive
+3. **If timeout** → retry with extended timeout
+4. **If no results** → show message (no tab opened)
 
-### Wayback Machine Flow:
-- Quick availability check using Wayback's API
+**Why fallback?** Archive.today's pre-check can be slower than the archive itself. Fallback provides smoother UX while keeping speed benefits when it works.
+
+### Wayback Machine
+- Quick API availability check
 - Falls back to full CDX lookup if needed
-- Confirms snapshot exists before opening
+- Confirms snapshot before opening
 
-## 🚀 Why the Fallback Mechanism?
+---
 
-Archive.today's pre-check service can sometimes be slower than the actual archive service itself. Instead of frustrating users with "timeout" errors that require multiple clicks, the extension now intelligently falls back to trying the archive anyway with extended timeouts and retry logic. This provides a much smoother user experience while maintaining the speed benefits of the pre-check when it works.
+## 🎯 URL Normalization
 
-## URL Normalization
+Removes tracking params (`utm_*`, `gclid`, `fbclid`, `gift`), hash fragments, trailing slashes, and default ports to match archived versions accurately.
 
-The extension normalizes URLs before checking for archived versions to improve match accuracy. This process removes:
+**Example:**  
+`https://example.com/article?utm_source=twitter#comment` → `https://example.com/article`
 
-- Tracking parameters: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`
-- Social media tracking: `gclid`, `fbclid`, `mc_cid`, `mc_eid`
-- News site access parameters: `gift` (used by Haaretz and similar sites)
-- URL fragments (hash)
-- Trailing slashes
-- Default ports (80 for HTTP, 443 for HTTPS)
+---
 
-This ensures that URLs like:
-- `https://example.com/article?utm_source=twitter&gift=abc123#comment`
-- `https://example.com/article/`
+## 🏗️ Architecture Overview
 
-Are both normalized to:
-- `https://example.com/article`
+### Key Components
 
-And can find the same archived version.
+**Core Logic (`src/core/archive-core.js`)**
+- `performArchive()` - Main archive workflow
+- Pre-check functions with retry logic
+- Handles both Archive.today and Wayback
 
-## Architecture Overview
+**Background (`src/background/service-worker.js`)**
+- Keyboard shortcut handling
+- Message passing between popup and core
+- Opens popup on shortcut failures
 
-### Core Components
+**Popup Coordinator (`src/popup/popup.js`)**
+- 52 lines - just initialization and orchestration
+- Imports and wires up all modules
 
-**src/core/archive-core.js** - Main business logic
-- `performArchive()` - Main function that handles the archive process
-- `precheckArchiveToday()` - Quick check for Archive.today snapshots with retry logic
-- `waybackHasSnapshotQuick()` - Quick check for Wayback snapshots
-- `getLatestWaybackSnapshot()` - Full CDX lookup for Wayback
+**History Management (`src/storage/history-manager.js`)**
+- Max 5 items with URL deduplication
+- `deleteHistoryItem()` / `restoreHistoryItem()` for undo support
+- Normalized URL matching
 
-**src/background/service-worker.js** - Service worker (MV3)
-- Handles keyboard shortcuts
-- Message passing between popup and core logic
-- Opens popup when shortcuts fail (shows error messages)
-- Command listener for instant archive operations
-
-**src/popup/popup.js** - Main coordinator (52 lines)
-- Imports and initializes all popup modules
-- Coordinates the initialization sequence
-- Sets up event listeners
-- Minimal, focused on orchestration
-
-**src/popup/modules/precheck.js** - Archive precheck functions
-- `hasArchiveTodaySnapshotQuick()` - Check Archive.Today
-- `hasWaybackSnapshotQuick()` - Check Wayback Machine
-- `warmPrecheck()` - Warm up precheck on popup open
-
-**src/popup/modules/history.js** - History management
-- `loadHistory()` - Load and render history items
-- `handleClearHistory()` - Clear with smooth animation and undo
-- Undo buffer with 5-second window
-
-**src/popup/modules/shortcuts.js** - Keyboard shortcut formatting
-- `initializeShortcutHints()` - Format and display shortcuts
-- Intelligent parsing of Mac concatenated shortcuts (e.g., "ShiftCmdE")
-- Symbol conversion: ⌘, ⇧, ⌥
-- Automatic Mac key reordering
-
-**src/popup/modules/ui-handlers.js** - Event handlers and UI setup
-- `initializeFonts()` - CSP-safe font loading
-- `initializeModalClose()` - Modal close button
-- `initializeServiceSelection()` - Archive service radio buttons
-- `initializeTabBehavior()` - New tab vs same tab toggle
-- `initializeDarkMode()` - Dark mode toggle and persistence
-- `initializeWarmPrecheck()` - Warm up archive prechecks
-- `initializeArchiveButton()` - Main "Rewind This Page" button
-
-**src/popup/modules/pending-messages.js** - Pending message handling
-- `showPendingMessageIfAny()` - Display errors from keyboard shortcuts
-- 30-second message timeout
-- Automatic cleanup of stale messages
-
-**src/storage/history-manager.js** - History management
-- Save archive entries with deduplication
-- URL normalization for matching
-- Limited to 5 most recent items
-- Smooth clear with undo functionality
-
-**src/ui/popup-ui.js** - UI rendering
-- History item rendering with RTL support
+**UI Rendering (`src/ui/popup-ui.js`)**
+- History rendering with delete handlers
 - Toast notifications
-- Modal message boxes
-- Keyboard shortcut hints
-- Dynamic relative timestamps
+- Modal dialogs
+- RTL support
 
-**src/utils/utils.js** - Shared utilities
-- Storage helpers (getStorage, setStorage)
-- URL validation and normalization
-- RTL text detection
-- Debounce helper
-- Keyboard shortcut formatting
+---
 
-**src/core/constants.js** - Configuration
-- Timeout values
-- Service identifiers
-- Storage keys
-- Error codes
-- URL templates
+## ⚡ State Management
 
-**src/core/error-messages.js** - User-facing messages
-- Maps error codes to friendly messages
-- Consistent error communication
+**Persistent (chrome.storage.local):**
+- User preferences (service, dark mode, tab behavior)
+- Archive history (max 5 items)
+- Pending error messages (30s timeout)
 
-### Data Flow
+**Instant (localStorage):**
+- Dark mode flag (prevents flash on load)
 
-1. User clicks "Rewind This Page" or uses keyboard shortcut (`Ctrl+Shift+U`)
-2. Extension gets current tab URL and title
-3. URL is normalized (tracking parameters removed)
-4. Based on selected service:
-   - **Archive.today**: Hermetic pre-check with retry → open archive URL
-   - **Wayback**: Quick API check → full CDX lookup if needed → open
-5. Save to history with normalized URL for deduplication
-6. Open in new tab or navigate same tab based on user preference
+**In-Memory:**
+- Warm precheck promises
+- Undo buffers (5s windows for clear/delete)
 
-### Error Handling
+---
 
-The extension handles various error conditions gracefully:
-- Invalid URLs (not http/https)
-- Unsupported page types (`chrome://`, `file://`, etc.)
-- Network timeouts (with automatic retry for Archive.today)
-- Service unavailability
-- No archived versions available
+## 🎨 UI/UX Features
 
-Instead of silent failures, users receive clear, actionable messages about what went wrong.
+- **Instant Dark Mode** - Loads before first paint via `popup-early.js`
+- **Warm Pre-checking** - Starts when popup opens
+- **Debounced Actions** - 100ms on archive button
+- **Toast Notifications** - Undo actions with 5s windows
+- **Relative Timestamps** - "X mins ago" with absolute fallback
+- **RTL Support** - Automatic text direction
+- **Keyboard Shortcuts** - Platform-specific symbols (⌘, ⇧, ⌥)
 
-### State Management
+---
 
-- **chrome.storage.local** for persistent data:
-  - User preferences (service, dark mode, tab behavior)
-  - Archive history (max 5 items)
-  - Pending error messages (30-second timeout)
-  
-- **localStorage** for instant dark mode (CSP-safe, prevents flash)
+## 🗑️ Individual History Item Deletion
 
-- **In-memory state**:
-  - Warm precheck promises
-  - Undo buffer for cleared history (5-second window)
+### Design
+- **×** button centered in metadata line (between service badge and timestamp)
+- Hidden by default, fades in on item hover
+- Gray → Bright red on hover (#ea4335 light, #ff6b6b dark)
+- No animations that cause jumping
 
-### UI/UX Features
+### Why Margin-Based Centering?
+```css
+position: absolute;
+left: 50%;
+top: 50%;
+margin-left: -8px;  /* Half of width */
+margin-top: -8px;   /* Half of height */
+```
 
-- **Instant Dark Mode**: Loads before first paint via `popup-early.js`
-- **Warm Pre-checking**: Starts precheck when popup opens
-- **Debounced Actions**: 100ms debounce on archive button
-- **Smooth Animations**: Staggered fade-in/out for history items
-- **Toast Notifications**: Non-intrusive feedback with undo actions
-- **Relative Timestamps**: Dynamic "X mins ago" updates in history
-- **RTL Support**: Proper text direction for Hebrew, Arabic content
-- **Keyboard Shortcuts**: Visual hints with platform-specific symbols (⌘, ⇧, ⌥)
-- **Mac Shortcut Handling**: Intelligent parsing and reordering of concatenated Mac shortcuts
+**Transform causes jumping.** Margin-based centering is static and perfectly stable.
 
-## Development
+### User Flow
+1. Hover item → × fades in
+2. Hover × → turns red
+3. Click → 500ms fade-out animation
+4. Toast with 5s undo window
+5. History re-renders (no entry animations)
 
-### Building & Testing
+### Technical Notes
+- Delete button created inline in metadata row (not absolute positioned outside)
+- `e.preventDefault()` + `e.stopPropagation()` prevents link navigation
+- Reuses `fadeOutSlide` animation for consistency
+- Removed entry animations to prevent unwanted movement during deletions
+- Separate undo buffer from "Clear History" feature
 
-1. Clone the repository
-2. Load unpacked extension from root directory in Chrome
-3. Changes to files in `src/` require extension reload
-4. Test both Archive.today and Wayback services
-5. Verify keyboard shortcuts work correctly
-6. Check history persistence and clearing
+---
+
+## 🔒 Security
+
+- URL validation and XSS protection
+- Rate limiting to prevent abuse
+- Secure external link handling
+
+---
+
+## 🚀 Development
+
+### Quick Start
+1. Clone repository
+2. Load unpacked extension in Chrome
+3. Changes require extension reload
+
+### Testing Checklist
+- Both archive services work
+- Keyboard shortcuts functional
+- History persistence and clearing
+- Individual delete with undo
+- Dark mode in both themes
+- RTL language support
 
 ### Code Style
-
-- ES6+ modules throughout
-- Async/await over callbacks
-- JSDoc comments for public functions
-- Small, focused functions with single responsibility
-- Consistent naming conventions
-- Modular architecture with clear separation of concerns
+- ES6+ modules
+- Async/await (no callbacks)
+- Small, focused functions
+- Clear separation of concerns

@@ -9,7 +9,7 @@
 - Choose between Archive.today or Wayback Machine
 - Track your last 5 archived pages
 - Dark mode support
-- Keyboard shortcuts: `Ctrl+Shift+Q` (open popup), `Ctrl+Shift+U` (instant open of latest snapshot)
+- Keyboard shortcuts: `Ctrl+Shift+E` (open popup), `Ctrl+Shift+U` (instant open of latest snapshot)
 - Option of choosing whether open the archived snapshot on a new tab or in the same one
 
 | Light Mode | Dark Mode |

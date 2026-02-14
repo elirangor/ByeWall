@@ -60,6 +60,44 @@ export async function getHistory() {
 }
 
 /**
+ * Delete a single history item by index
+ * @param {number} index - Index of the item to delete
+ */
+export async function deleteHistoryItem(index) {
+  const { [STORAGE_KEYS.ARCHIVE_HISTORY]: archiveHistory = [] } =
+    await getStorage(STORAGE_KEYS.ARCHIVE_HISTORY);
+
+  if (index < 0 || index >= archiveHistory.length) {
+    return null;
+  }
+
+  // Remove the item and return it for potential undo
+  const deletedItem = archiveHistory.splice(index, 1)[0];
+  
+  await setStorage(STORAGE_KEYS.ARCHIVE_HISTORY, archiveHistory);
+  
+  return deletedItem;
+}
+
+/**
+ * Restore a deleted history item at a specific position
+ * @param {Object} item - The item to restore
+ * @param {number} index - Position to insert at
+ */
+export async function restoreHistoryItem(item, index) {
+  const { [STORAGE_KEYS.ARCHIVE_HISTORY]: archiveHistory = [] } =
+    await getStorage(STORAGE_KEYS.ARCHIVE_HISTORY);
+
+  // Insert at the specified index
+  archiveHistory.splice(index, 0, item);
+  
+  await setStorage(
+    STORAGE_KEYS.ARCHIVE_HISTORY,
+    archiveHistory.slice(0, HISTORY_CONFIG.MAX_ITEMS),
+  );
+}
+
+/**
  * Clear all history
  */
 export async function clearHistory() {

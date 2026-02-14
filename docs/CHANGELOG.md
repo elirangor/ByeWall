@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.2
+
+- **Individual history item deletion**: Added hover-revealed delete button (×) centered in the metadata line for each history item. Allows deletion of specific archived pages without clearing entire history. Features smooth fade-in on hover, bright red color indication, 5-second undo window with toast notification, and stable positioning with no jumping or unwanted animations.
+
 ## v2.2.1
 
 - **Improved keyboard shortcut display**: Shortcuts now show with symbols (⌘, ⇧, ⌥) for a more native look on both Mac and Windows. Mac shortcuts are automatically reordered to follow platform conventions (Cmd > Ctrl > Alt > Shift > Key).

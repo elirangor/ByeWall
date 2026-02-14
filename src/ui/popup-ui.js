@@ -54,8 +54,10 @@ function formatHistoryDate(timestamp) {
 
 /**
  * Render history items to the DOM with smooth transitions
+ * @param {Array} historyItems - History items to render
+ * @param {Function} onDelete - Callback when delete button is clicked
  */
-export function renderHistory(historyItems) {
+export function renderHistory(historyItems, onDelete = null) {
   const list = document.getElementById("historyList");
   const section = document.getElementById("history-section");
   if (!list || !section) return;
@@ -79,7 +81,7 @@ export function renderHistory(historyItems) {
   section.classList.remove("hiding");
   section.classList.add("showing");
 
-  historyItems.forEach((item) => {
+  historyItems.forEach((item, index) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
     a.href = item.archiveUrl;
@@ -107,12 +109,30 @@ export function renderHistory(historyItems) {
     svc.className = "service";
     svc.textContent = item.service;
 
+    // Create delete button (centered between service and timestamp)
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "history-item-delete";
+    deleteBtn.textContent = "×";
+    deleteBtn.setAttribute("aria-label", "Delete this history item");
+    
+    // Prevent link navigation when clicking delete
+    deleteBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onDelete) {
+        onDelete(item, index);
+      }
+    });
+
     const ts = document.createElement("span");
     ts.className = "timestamp";
     ts.textContent = formatHistoryDate(item.timestamp);
 
+    // Insert in order: service badge, delete button (centered), timestamp
     meta.appendChild(svc);
+    meta.appendChild(deleteBtn);
     meta.appendChild(ts);
+    
     detailsDiv.appendChild(titleEl);
     detailsDiv.appendChild(meta);
     a.appendChild(detailsDiv);
