@@ -66,7 +66,25 @@ async function handleDeleteItem(item, index) {
         if (recentlyDeletedItem && recentlyDeletedIndex !== null) {
           // Restore the item
           await restoreHistoryItem(recentlyDeletedItem, recentlyDeletedIndex);
+          
+          // Reload history
           await loadHistory();
+          
+          // Add restoring animation class to the newly restored item
+          const historyList = document.getElementById("historyList");
+          if (historyList && historyList.children[recentlyDeletedIndex]) {
+            const restoredListItem = historyList.children[recentlyDeletedIndex];
+            const historyItem = restoredListItem.querySelector(".history-item");
+            if (historyItem) {
+              historyItem.classList.add("restoring");
+              
+              // Remove the class after animation completes
+              setTimeout(() => {
+                historyItem.classList.remove("restoring");
+              }, 400); // Match animation duration
+            }
+          }
+          
           showToast("Item restored", { type: "success", duration: 2000 });
 
           // Clear the timeout since undo was used
@@ -136,6 +154,23 @@ export async function handleClearHistory() {
               recentlyClearedHistory,
             );
             await loadHistory();
+            
+            // Add restoring animation to all restored items
+            const historyList = document.getElementById("historyList");
+            if (historyList) {
+              const items = historyList.querySelectorAll(".history-item");
+              items.forEach((item, index) => {
+                setTimeout(() => {
+                  item.classList.add("restoring");
+                  
+                  // Remove the class after animation completes
+                  setTimeout(() => {
+                    item.classList.remove("restoring");
+                  }, 400); // Match animation duration
+                }, index * 50); // Stagger the animation
+              });
+            }
+            
             showToast("History restored", { type: "success", duration: 2000 });
 
             // Clear the timeout since undo was used

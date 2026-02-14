@@ -381,6 +381,10 @@ input:checked + .slider:before {
   }
 }
 
+.history-item.restoring {
+  animation: fadeInSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .history-item-content {
   display: flex;
   flex-direction: column;
