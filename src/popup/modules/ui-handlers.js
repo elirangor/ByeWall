@@ -84,17 +84,26 @@ export async function initializeTabBehavior() {
 }
 
 /**
- * Initialize dark mode toggle - applies to html element
+ * Initialize dark mode toggle - applies to html element.
+ * Priority:
+ *   1. User's saved preference (explicit choice always wins)
+ *   2. OS/browser prefers-color-scheme if no preference saved yet
  */
 export async function initializeDarkMode() {
   const { [STORAGE_KEYS.DARK_MODE]: darkModeEnabled } = await getStorage(
     STORAGE_KEYS.DARK_MODE,
   );
 
+  // Determine effective dark mode state
+  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = darkModeEnabled !== undefined
+    ? darkModeEnabled
+    : systemPrefersDark;
+
   const toggle = document.getElementById("darkModeToggle");
 
   // Set initial state SYNCHRONOUSLY before enabling transitions
-  if (darkModeEnabled) {
+  if (isDark) {
     document.documentElement.classList.add("dark-mode");
     if (toggle) {
       toggle.checked = true;
@@ -107,7 +116,7 @@ export async function initializeDarkMode() {
   // Use setTimeout to ensure it happens after the current render frame
   setTimeout(() => {
     document.body.classList.add("loaded");
-  }, 50); // Small delay to ensure toggle is fully rendered in checked state
+  }, 50);
 
   if (toggle) {
     toggle.addEventListener("change", () => {

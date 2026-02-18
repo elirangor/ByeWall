@@ -4,6 +4,8 @@
 
 - **Switched to native Chrome popup trigger**: Replaced the custom `open_extension` command with Chrome's reserved `_execute_action` command name. This eliminates the duplicate "Open popup" button that appeared in the Chrome extensions shortcuts settings page, and lets Chrome handle the popup shortcut natively.
 - **Updated shortcut descriptions**: Command descriptions in `manifest.json` now match the labels shown in the popup ("Launch Page Rewind", "Open Latest Snapshot"), keeping the UI consistent across the extension and Chrome's settings page.
+System dark mode detection: On first launch, the extension now automatically follows the OS/browser dark mode preference. Once the user manually toggles the switch, their explicit choice is saved and always takes priority.
+- **System dark mode detection**: On first launch, the extension now automatically follows the OS/browser dark mode preference. Once the user manually toggles the switch, their explicit choice is saved and always takes priority.
 
 ## v2.2.3
 
