@@ -269,7 +269,6 @@ export function getCurrentTabInfo() {
     });
   });
 }
-
 /**
  * Update keyboard shortcut hints with horizontal layout
  */
@@ -278,7 +277,7 @@ export function updateShortcutHints(formatShortcut) {
   if (!container) return;
 
   chrome.commands.getAll((commands) => {
-    const openCmd = commands.find((c) => c.name === "open_extension");
+    const openCmd = commands.find((c) => c.name === "_execute_action");
     const archiveCmd = commands.find((c) => c.name === "archive_current");
 
     // Create horizontal keyboard shortcuts display

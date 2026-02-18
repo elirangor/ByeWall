@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Page Rewind",
-  "version": "2.2.3",
+  "version": "2.2.4",
   "description": "Open archived versions of web pages using Archive.today or the Wayback Machine.",
   "action": {
     "default_title": "Page Rewind",
@@ -25,19 +25,19 @@
     "128": "assets/icon.png"
   },
   "commands": {
-    "open_extension": {
+    "_execute_action": {
       "suggested_key": {
         "default": "Ctrl+Shift+E",
         "mac": "Command+Shift+E"
       },
-      "description": "Open the Page Rewind popup"
+      "description": "Launch Page Rewind"
     },
     "archive_current": {
       "suggested_key": {
         "default": "Ctrl+Shift+U",
         "mac": "Command+Shift+U"
       },
-      "description": "Open an archived snapshot of the current page"
+      "description": "Open Latest Snapshot"
     }
   }
 }

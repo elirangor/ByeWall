@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.4
+
+- **Switched to native Chrome popup trigger**: Replaced the custom `open_extension` command with Chrome's reserved `_execute_action` command name. This eliminates the duplicate "Open popup" button that appeared in the Chrome extensions shortcuts settings page, and lets Chrome handle the popup shortcut natively.
+- **Updated shortcut descriptions**: Command descriptions in `manifest.json` now match the labels shown in the popup ("Launch Page Rewind", "Open Latest Snapshot"), keeping the UI consistent across the extension and Chrome's settings page.
+
 ## v2.2.3
 
 - **Fixed dark mode flash on popup open**: Eliminated the brief light-to-dark transition when opening the popup in dark mode. Dark mode now applies instantly to the HTML element before first paint, with no visible flash or Content Security Policy violations. Toggle animations still work smoothly when manually switching modes.

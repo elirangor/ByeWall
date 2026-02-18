@@ -50,29 +50,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 });
 
 // Keyboard shortcuts
+// Note: _execute_action (open popup) is handled natively by Chrome — no handler needed here.
 chrome.commands.onCommand.addListener(async (command) => {
   console.log("[ByeWall Background] Command received:", command);
   try {
-    if (command === "open_extension") {
-      const wins = await chrome.windows.getAll({ populate: false });
-      const hasNormalWin = wins.some((w) => w.type === "normal");
-      if (!hasNormalWin) return;
-
-      try {
-        await chrome.action.openPopup();
-      } catch (e) {
-        console.debug(
-          "[ByeWall Background] openPopup failed:",
-          e?.message || e,
-        );
-      }
-    } else if (command === "archive_current") {
+    if (command === "archive_current") {
       console.log("[ByeWall Background] Running performArchive from shortcut");
       const res = await performArchive();
       console.log("[ByeWall Background] performArchive result:", res);
       if (!res || res.ok === false) {
         console.log("[ByeWall Background] Failed, opening popup with error");
-        // Stash message for the popup and open it so the user sees feedback
         await setStorage(STORAGE_KEYS.PENDING_MESSAGE, {
           code: res?.error || ERROR_CODES.UNKNOWN_ERROR,
           time: Date.now(),
