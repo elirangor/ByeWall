@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.3
+
+- **Badge confirmation on keyboard shortcut**: A green ✓ badge now appears on the extension icon when a snapshot is successfully opened via keyboard shortcut, then fades away after a few seconds.
+
+- **Footer redesigned with SVG icons**: Replaced the text links in the footer with clean SVG icons for LinkedIn, GitHub, and Chrome Web Store — icons adapt to light and dark mode automatically.
+
 ## v2.2.4
 
 - **Switched to native Chrome popup trigger**: Replaced the custom `open_extension` command with Chrome's reserved `_execute_action` command name. This eliminates the duplicate "Open popup" button that appeared in the Chrome extensions shortcuts settings page, and lets Chrome handle the popup shortcut natively.

@@ -152,25 +152,38 @@ button:disabled {
 
 /* Footer */
 .credit {
-  margin-top: 12px;
-  font-size: 10px;
-  color: #5f6368;
-  text-align: center;
-  padding-top: 10px;
+  margin-top: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding-top: 8px;
   border-top: 1px solid #bdc1c6;
-  transition: color 0.3s, border-color 0.3s;
+  transition: border-color 0.3s;
 }
 
 .credit a {
-  color: #1a73e8;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.15s ease;
+  color: #5f6368;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .credit a:hover {
-  text-decoration: underline;
-  color: #1557b0;
+  color: #1a73e8;
+  transform: translateY(-2px);
+}
+
+html.dark-mode .credit {
+  border-color: #5f6368;
+}
+
+html.dark-mode .credit a {
+  color: #e8eaed;
+}
+
+html.dark-mode .credit a:hover {
+  color: #8ab4f8;
 }
 
 /* Keyboard shortcuts */

@@ -58,6 +58,7 @@ chrome.commands.onCommand.addListener(async (command) => {
       console.log("[ByeWall Background] Running performArchive from shortcut");
       const res = await performArchive();
       console.log("[ByeWall Background] performArchive result:", res);
+
       if (!res || res.ok === false) {
         console.log("[ByeWall Background] Failed, opening popup with error");
         await setStorage(STORAGE_KEYS.PENDING_MESSAGE, {
@@ -65,6 +66,18 @@ chrome.commands.onCommand.addListener(async (command) => {
           time: Date.now(),
         });
         await chrome.action.openPopup();
+      } else {
+        // Success — show green badge then step-fade out
+        await chrome.action.setBadgeBackgroundColor({ color: "#34a853" });
+        await chrome.action.setBadgeText({ text: "✓" });
+
+setTimeout(async () => {
+  const steps = ["✓", "·", ""];
+  for (const text of steps) {
+    await chrome.action.setBadgeText({ text });
+    await new Promise((r) => setTimeout(r, 200));
+  }
+}, 2000);
       }
     }
   } catch (err) {
