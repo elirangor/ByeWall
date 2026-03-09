@@ -620,7 +620,8 @@
 
     try {
       const archiveUrl = await buildArchiveUrl(currentUrl, service);
-      window.location.href = archiveUrl;
+      window.open(archiveUrl, '_blank');
+      setTimeout(() => window.close(), 300);
     } catch {
       document.getElementById('errorMsg').textContent = 'Network error — check your connection and try again.';
     } finally {
@@ -638,8 +639,7 @@
       currentUrl = url;
       try {
         const archiveUrl = await buildArchiveUrl(url, getService());
-        window.location.href = archiveUrl;
-        // window.close() after redirect for cleanup (works on some browsers)
+        window.open(archiveUrl, '_blank');
         setTimeout(() => window.close(), 300);
       } catch {
         showError('Could not open archive. Try a different service below.');
