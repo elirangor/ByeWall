@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Instant dark mode before paint — mirrors popup-early.js -->
   <script>
     (function () {
       try {
@@ -29,9 +30,14 @@
   </script>
 
   <style>
+    /* ============================================================
+       BASE — mirrors extension popup.css
+    ============================================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html.dark-mode { background: #1a1d23; }
+    html.dark-mode {
+      background: #1a1d23;
+    }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -40,7 +46,9 @@
       min-height: 100dvh;
     }
 
-    body.loaded { transition: background 0.3s, color 0.3s; }
+    body.loaded {
+      transition: background 0.3s, color 0.3s;
+    }
 
     html.dark-mode body {
       background: linear-gradient(135deg, #1a1d23 0%, #26292e 100%);
@@ -53,7 +61,9 @@
       padding: calc(env(safe-area-inset-top, 0px) + 20px) 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
     }
 
-    /* ── HEADER ── */
+    /* ============================================================
+       HEADER
+    ============================================================ */
     .header-container {
       display: flex;
       justify-content: space-between;
@@ -61,176 +71,586 @@
       margin-bottom: 12px;
     }
 
-    h3 { margin: 0; color: #202124; font-size: 20px; font-weight: 600; transition: color 0.3s; }
+    h3 {
+      margin: 0;
+      color: #202124;
+      font-size: 20px;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
     html.dark-mode h3 { color: #f0f0f0; }
 
-    h4 { margin: 0 0 8px 0; font-size: 14px; color: #202124; font-weight: 600; transition: color 0.3s; }
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      color: #202124;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
     html.dark-mode h4 { color: #f0f0f0; }
 
-    /* ── DARK MODE TOGGLE ── */
+    /* ============================================================
+       DARK MODE TOGGLE — exact from extension
+    ============================================================ */
     .toggle-container { display: flex; }
 
-    .toggle-switch { position: relative; display: inline-block; width: 52px; height: 28px; }
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 52px;
+      height: 28px;
+    }
+
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
 
     .slider {
-      position: absolute; cursor: pointer; inset: 0;
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
       background: linear-gradient(135deg, #5f6368 0%, #4a5157 100%);
       border-radius: 28px;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
     }
 
     body.loaded .slider { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-    .slider:hover { box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 4px rgba(95,99,104,0.1); }
-    .toggle-switch input:focus-visible + .slider { outline: 2px solid #1a73e8; outline-offset: 2px; }
+
+    .slider:hover {
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 4px rgba(95,99,104,0.1);
+    }
+
+    .toggle-switch input:focus-visible + .slider {
+      outline: 2px solid #1a73e8;
+      outline-offset: 2px;
+    }
 
     .slider:before {
-      content: ''; position: absolute;
-      height: 16px; width: 16px; left: 6px; bottom: 6px;
-      background: #ffffff; border-radius: 50%;
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 6px;
+      bottom: 6px;
+      background: #ffffff;
+      border-radius: 50%;
       box-shadow:
         0 2px 6px rgba(0,0,0,0.15),
-        0 -11px 0 -2px #ffa726, 8px -8px 0 -2px #ffa726,
-        11px 0 0 -2px #ffa726, 8px 8px 0 -2px #ffa726,
-        0 11px 0 -2px #ffa726, -8px 8px 0 -2px #ffa726,
-        -11px 0 0 -2px #ffa726, -8px -8px 0 -2px #ffa726,
+        0 -11px 0 -2px #ffa726,
+        8px -8px 0 -2px #ffa726,
+        11px 0 0 -2px #ffa726,
+        8px 8px 0 -2px #ffa726,
+        0 11px 0 -2px #ffa726,
+        -8px 8px 0 -2px #ffa726,
+        -11px 0 0 -2px #ffa726,
+        -8px -8px 0 -2px #ffa726,
         inset 0 0 3px rgba(0,0,0,0.08);
     }
 
     body.loaded .slider:before { transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1); }
 
-    input:checked + .slider { background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-    input:checked + .slider:hover { box-shadow: inset 0 2px 4px rgba(0,0,0,0.25), 0 0 0 4px rgba(26,115,232,0.15); }
-    input:checked + .slider:before { transform: translateX(24px) rotate(-25deg); background: #4a9eff; box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 7px -3px 0 0 #2b2f36; }
+    input:checked + .slider {
+      background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
 
-    html.dark-mode .slider { background: linear-gradient(135deg, #4a5157 0%, #3e444b 100%); box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
-    html.dark-mode input:checked + .slider { background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%); }
+    input:checked + .slider:hover {
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.25), 0 0 0 4px rgba(26,115,232,0.15);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px) rotate(-25deg);
+      background: #4a9eff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 7px -3px 0 0 #2b2f36;
+    }
+
+    html.dark-mode .slider {
+      background: linear-gradient(135deg, #4a5157 0%, #3e444b 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    html.dark-mode input:checked + .slider {
+      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+    }
+
     html.dark-mode .slider:before {
       background: #f8f9fa;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4),
-        0 -11px 0 -2px #ffa726, 8px -8px 0 -2px #ffa726,
-        11px 0 0 -2px #ffa726, 8px 8px 0 -2px #ffa726,
-        0 11px 0 -2px #ffa726, -8px 8px 0 -2px #ffa726,
-        -11px 0 0 -2px #ffa726, -8px -8px 0 -2px #ffa726;
+      box-shadow:
+        0 2px 6px rgba(0,0,0,0.4),
+        0 -11px 0 -2px #ffa726,
+        8px -8px 0 -2px #ffa726,
+        11px 0 0 -2px #ffa726,
+        8px 8px 0 -2px #ffa726,
+        0 11px 0 -2px #ffa726,
+        -8px 8px 0 -2px #ffa726,
+        -11px 0 0 -2px #ffa726,
+        -8px -8px 0 -2px #ffa726;
     }
-    html.dark-mode input:checked + .slider:before { background: #4a9eff; box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 7px -3px 0 0 #2b2f36; }
 
-    /* ── URL CARD ── */
+    html.dark-mode input:checked + .slider:before {
+      background: #4a9eff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5), inset 7px -3px 0 0 #2b2f36;
+    }
+
+    /* ============================================================
+       URL CARD
+    ============================================================ */
     .url-card {
-      background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 12px;
-      border: 1px solid #dadce0; box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #dadce0;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
       transition: background-color 0.3s, border-color 0.3s;
     }
-    html.dark-mode .url-card { background: #31363d; border-color: #444c56; }
 
-    .url-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #5f6368; margin-bottom: 6px; transition: color 0.3s; }
+    html.dark-mode .url-card {
+      background: #31363d;
+      border-color: #444c56;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .url-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #5f6368;
+      margin-bottom: 6px;
+      transition: color 0.3s;
+    }
+
     html.dark-mode .url-label { color: #9aa0a6; }
 
-    .url-text { font-size: 12px; color: #202124; word-break: break-all; line-height: 1.5; transition: color 0.3s; }
-    html.dark-mode .url-text { color: #e0e0e0; }
-    .url-text.empty { color: #9aa0a6; font-style: italic; }
+    .url-text {
+      font-size: 12px;
+      color: #202124;
+      word-break: break-all;
+      line-height: 1.5;
+      transition: color 0.3s;
+    }
 
-    /* ── OPTIONS SECTION ── */
+    html.dark-mode .url-text { color: #e0e0e0; }
+
+    .url-text.empty {
+      color: #9aa0a6;
+      font-style: italic;
+    }
+
+    /* ============================================================
+       OPTIONS SECTION — exact from extension
+    ============================================================ */
     .options-section {
-      background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 12px;
-      border: 1px solid #dadce0; box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #dadce0;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
       transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
-    html.dark-mode .options-section { background: #31363d; border-color: #444c56; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
 
-    label { display: flex; align-items: center; margin-bottom: 8px; cursor: pointer; font-size: 13px; color: #202124; transition: color 0.3s; }
+    html.dark-mode .options-section {
+      background: #31363d;
+      border-color: #444c56;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #202124;
+      transition: color 0.3s;
+    }
+
     label:last-child { margin-bottom: 0; }
     html.dark-mode label { color: #e0e0e0; }
 
     input[type="radio"] {
-      -webkit-appearance: none; appearance: none;
-      width: 16px; height: 16px; margin-right: 10px;
-      border-radius: 50%; border: 2px solid #dadce0; background: #fff;
-      display: inline-grid; place-content: center; cursor: pointer; flex-shrink: 0;
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      margin-right: 10px;
+      border-radius: 50%;
+      border: 2px solid #dadce0;
+      background: #fff;
+      display: inline-grid;
+      place-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
       transition: border-color 0.15s ease, background-color 0.15s ease;
     }
-    input[type="radio"]::before { content: ''; width: 8px; height: 8px; border-radius: 50%; transform: scale(0); transition: transform 0.15s ease; background: #1a73e8; }
+
+    input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      transform: scale(0);
+      transition: transform 0.15s ease;
+      background: #1a73e8;
+    }
+
     input[type="radio"]:checked { border-color: #1a73e8; }
     input[type="radio"]:checked::before { transform: scale(1); }
-    html.dark-mode input[type="radio"] { border-color: #6c757d; background: #2b2f36; }
+
+    html.dark-mode input[type="radio"] {
+      border-color: #6c757d;
+      background: #2b2f36;
+    }
+
     html.dark-mode input[type="radio"]::before { background: #4a9eff; }
     html.dark-mode input[type="radio"]:checked { border-color: #4a9eff; }
 
-    /* ── BUTTON ── */
+    /* ============================================================
+       MAIN BUTTON — exact from extension
+    ============================================================ */
     .archive-btn {
-      width: 100%; background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
-      color: white; padding: 10px 14px; border: none; border-radius: 8px;
-      font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+      width: 100%;
+      background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+      color: white;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 3px 8px rgba(26,115,232,0.3), 0 1px 3px rgba(0,0,0,0.08);
-      display: flex; align-items: center; justify-content: center; gap: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
-    .archive-btn:hover:not(:disabled) { background: linear-gradient(135deg, #1557b0 0%, #0d47a1 100%); box-shadow: 0 5px 14px rgba(26,115,232,0.4); transform: translateY(-2px); }
-    .archive-btn:active:not(:disabled) { transform: translateY(0); }
-    .archive-btn:disabled { background: #9aa0a6; cursor: not-allowed; transform: none; box-shadow: none; }
 
-    html.dark-mode .archive-btn { background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%); box-shadow: 0 2px 6px rgba(74,158,255,0.3); }
-    html.dark-mode .archive-btn:hover:not(:disabled) { background: linear-gradient(135deg, #357abd 0%, #2563eb 100%); }
+    .archive-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #1557b0 0%, #0d47a1 100%);
+      box-shadow: 0 5px 14px rgba(26,115,232,0.4), 0 2px 6px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+
+    .archive-btn:active:not(:disabled) { transform: translateY(0); }
+
+    .archive-btn:disabled {
+      background: #9aa0a6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    html.dark-mode .archive-btn {
+      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+      box-shadow: 0 2px 6px rgba(74,158,255,0.3);
+    }
+
+    html.dark-mode .archive-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #357abd 0%, #2563eb 100%);
+      box-shadow: 0 4px 12px rgba(74,158,255,0.4);
+    }
+
     html.dark-mode .archive-btn:disabled { background: #444c56; }
 
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; flex-shrink: 0; }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
+
     .archive-btn.loading .spinner { display: block; }
 
-    /* ── STATUS BOX ── */
-    .status-box { display: none; margin-top: 10px; padding: 12px 14px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
-    .status-box.show.error { display: block; background: #fce8e6; border: 1px solid #f28b82; color: #c62828; }
-    html.dark-mode .status-box.show.error { background: #3e1f1f; border-color: #ef5350; color: #ff8a80; }
+    /* ============================================================
+       TAB BEHAVIOR — exact from extension
+    ============================================================ */
+    .tab-behavior-section { margin: 12px 0; }
 
-    /* ── DIVIDER ── */
-    .divider { height: 1px; background: #dadce0; margin: 12px 0; transition: background 0.3s; }
+    .tab-choice {
+      display: flex;
+      width: 100%;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f8f9fa;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    html.dark-mode .tab-choice {
+      background: #2b2f36;
+      border-color: #444c56;
+    }
+
+    .tab-option {
+      flex: 1;
+      text-align: center;
+      padding: 10px 0;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      user-select: none;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: #5f6368;
+      border: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-option + .tab-option { border-left: 1px solid #dadce0; }
+
+    html.dark-mode .tab-option + .tab-option { border-left-color: #444c56; }
+
+    .tab-option.active {
+      background: linear-gradient(135deg, #1a73e8 0%, #1557b0 100%);
+      color: white;
+      font-weight: 600;
+    }
+
+    .tab-option:not(.active):hover {
+      background: rgba(232,234,237,0.6);
+      color: #202124;
+    }
+
+    html.dark-mode .tab-option { color: #9aa0a6; }
+
+    html.dark-mode .tab-option.active {
+      background: linear-gradient(135deg, #4a9eff 0%, #357abd 100%);
+      color: white;
+    }
+
+    html.dark-mode .tab-option:not(.active):hover {
+      background: #3e444b;
+      color: #e0e0e0;
+    }
+
+    /* ============================================================
+       STATUS BOX
+    ============================================================ */
+    .status-box {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+      transition: background 0.3s;
+    }
+
+    .status-box.show { display: block; }
+
+    .status-box.error {
+      background: #fce8e6;
+      border: 1px solid #f28b82;
+      color: #c62828;
+    }
+
+    html.dark-mode .status-box.error {
+      background: #3e1f1f;
+      border-color: #ef5350;
+      color: #ff8a80;
+    }
+
+    /* ============================================================
+       DIVIDER
+    ============================================================ */
+    .divider {
+      height: 1px;
+      background: #dadce0;
+      margin: 12px 0;
+      transition: background 0.3s;
+    }
+
     html.dark-mode .divider { background: #444c56; }
 
-    /* ── INSTALL STEPS ── */
+    /* ============================================================
+       INSTALL SECTION
+    ============================================================ */
     .install-steps {
-      background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; overflow: hidden;
-      box-shadow: 0 1px 3px rgba(60,64,67,0.1); transition: background-color 0.3s, border-color 0.3s;
+      background: #f8f9fa;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+      transition: background-color 0.3s, border-color 0.3s;
     }
-    html.dark-mode .install-steps { background: #31363d; border-color: #444c56; }
 
-    .install-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #202124; padding: 10px 12px; border-bottom: 1px solid #e8eaed; transition: color 0.3s, border-color 0.3s; }
+    html.dark-mode .install-steps {
+      background: #31363d;
+      border-color: #444c56;
+    }
+
+    .install-step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      color: #202124;
+      padding: 10px 12px;
+      border-bottom: 1px solid #e8eaed;
+      transition: color 0.3s, border-color 0.3s;
+    }
+
     .install-step:last-child { border-bottom: none; }
-    html.dark-mode .install-step { color: #e0e0e0; border-color: #444c56; }
 
-    .step-num { width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(135deg, #1a73e8, #1557b0); color: white; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-    html.dark-mode .step-num { background: linear-gradient(135deg, #4a9eff, #357abd); }
+    html.dark-mode .install-step {
+      color: #e0e0e0;
+      border-color: #444c56;
+    }
+
+    .step-num {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1a73e8, #1557b0);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    html.dark-mode .step-num {
+      background: linear-gradient(135deg, #4a9eff, #357abd);
+    }
+
     .step-text { line-height: 1.5; }
     .step-text strong { font-weight: 600; }
 
-    /* ── SHORTCUT LINKS ── */
-    .shortcut-links { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-    .shortcut-link { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f8f9fa; border: 1px solid #dadce0; border-radius: 8px; color: #1a73e8; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(60,64,67,0.1); }
-    .shortcut-link:hover { background: #e8f0fe; border-color: #1a73e8; transform: translateY(-1px); }
-    html.dark-mode .shortcut-link { background: #31363d; border-color: #444c56; color: #8ab4f8; }
-    html.dark-mode .shortcut-link:hover { background: #3e444b; border-color: #8ab4f8; }
+    /* Shortcut links */
+    .shortcut-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
 
-    /* ── FOOTER ── */
-    .credit { margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 20px; padding-top: 8px; border-top: 1px solid #bdc1c6; transition: border-color 0.3s; }
+    .shortcut-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      color: #1a73e8;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+    }
+
+    .shortcut-link:hover {
+      background: #e8f0fe;
+      border-color: #1a73e8;
+      transform: translateY(-1px);
+    }
+
+    html.dark-mode .shortcut-link {
+      background: #31363d;
+      border-color: #444c56;
+      color: #8ab4f8;
+    }
+
+    html.dark-mode .shortcut-link:hover {
+      background: #3e444b;
+      border-color: #8ab4f8;
+    }
+
+    /* ============================================================
+       FOOTER — exact from extension
+    ============================================================ */
+    .credit {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding-top: 8px;
+      border-top: 1px solid #bdc1c6;
+      transition: border-color 0.3s;
+    }
+
     html.dark-mode .credit { border-color: #5f6368; }
-    .credit a { color: #5f6368; display: flex; align-items: center; transition: color 0.2s ease, transform 0.2s ease; }
+
+    .credit a {
+      color: #5f6368;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
     .credit a:hover { color: #1a73e8; transform: translateY(-2px); }
+
     html.dark-mode .credit a { color: #e8eaed; }
     html.dark-mode .credit a:hover { color: #8ab4f8; }
 
-    /* ── TOAST ── */
-    .toast { position: fixed; bottom: calc(env(safe-area-inset-bottom, 0px) + 20px); left: 50%; transform: translateX(-50%) translateY(100px); background: #202124; color: white; padding: 12px 20px; border-radius: 8px; font-size: 13px; font-weight: 500; box-shadow: 0 4px 16px rgba(0,0,0,0.3); z-index: 1000; opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
-    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-    .toast.success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); }
-    html.dark-mode .toast { background: #3e444b; }
-    html.dark-mode .toast.success { background: linear-gradient(135deg, #2d8e47 0%, #1e7e34 100%); }
+    /* ============================================================
+       TOAST — exact from extension
+    ============================================================ */
+    .toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 20px);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #202124;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      z-index: 1000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
 
-    body.busy::before { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.15); cursor: progress; z-index: 999; }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+    }
+
+    html.dark-mode .toast { background: #3e444b; }
+    html.dark-mode .toast.success {
+      background: linear-gradient(135deg, #2d8e47 0%, #1e7e34 100%);
+    }
+
+    /* Busy overlay */
+    body.busy::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.15);
+      cursor: progress;
+      z-index: 999;
+    }
   </style>
 </head>
 <body>
 
 <div class="app">
 
+  <!-- Header — matches extension exactly -->
   <div class="header-container">
     <h3>Page Rewind 📰</h3>
     <div class="toggle-container">
@@ -241,11 +661,13 @@
     </div>
   </div>
 
+  <!-- URL preview -->
   <div class="url-card">
     <div class="url-label">Page to archive</div>
     <div class="url-text empty" id="urlDisplay">Share a page from your browser to get started.</div>
   </div>
 
+  <!-- Service selection — matches extension exactly -->
   <div class="options-section">
     <label>
       <input type="radio" id="archiveTodayRadio" name="archiveService" value="archiveToday" checked />
@@ -257,13 +679,24 @@
     </label>
   </div>
 
+  <!-- Main action button -->
   <button class="archive-btn" id="archiveBtn" disabled onclick="openArchive()">
     <div class="spinner"></div>
     <span class="btn-label">Rewind This Page</span>
   </button>
 
+  <!-- Error status -->
   <div class="status-box" id="statusBox"></div>
 
+  <!-- Tab behavior — matches extension exactly -->
+  <div class="tab-behavior-section">
+    <div class="tab-choice" id="tabChoice">
+      <div class="tab-option active" data-value="new">➕ New Tab</div>
+      <div class="tab-option" data-value="same">🔄 Same Tab</div>
+    </div>
+  </div>
+
+  <!-- Install instructions — only when no URL is shared -->
   <div id="installSection">
     <div class="divider"></div>
     <h4 style="margin-bottom: 10px;">How to use on Android</h4>
@@ -313,15 +746,22 @@
     </div>
   </div>
 
+  <!-- Footer — matches extension exactly -->
   <div class="credit" style="margin-top: 14px;">
     <a href="https://www.linkedin.com/in/elirang/" target="_blank" rel="noopener noreferrer" title="Eliran on LinkedIn">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      </svg>
     </a>
     <a href="https://github.com/elirangor/ByeWall" target="_blank" rel="noopener noreferrer" title="View on GitHub">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+      </svg>
     </a>
     <a href="https://chromewebstore.google.com/detail/page-rewind/jagkfgieephkcbdhanohgfkeghfjnmcf" target="_blank" rel="noopener noreferrer" title="Get on Chrome Web Store">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 10.545a1.455 1.455 0 1 0 0 2.91 1.455 1.455 0 0 0 0-2.91z"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29zm13.342 2.166a5.446 5.446 0 0 1 1.45 7.09l.002.001h-.002l-5.344 9.257c.206.01.413.016.621.016 6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.818-4.364zM12 10.545a1.455 1.455 0 1 0 0 2.91 1.455 1.455 0 0 0 0-2.91z"/>
+      </svg>
     </a>
   </div>
 
@@ -331,17 +771,20 @@
 
 <script>
   let currentUrl = '';
+  let openInNewTab = true;
 
+  /* ── DARK MODE — mirrors popup-early.js + ui-handlers.js ── */
   function initDarkMode() {
     const saved = localStorage.getItem('darkModeEnabled');
     const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const isDark = saved !== null ? saved === 'true' : systemDark;
+
     const toggle = document.getElementById('darkModeToggle');
 
     if (isDark) {
       document.documentElement.classList.add('dark-mode');
       toggle.checked = true;
-      toggle.offsetHeight;
+      toggle.offsetHeight; // force reflow before transitions enable
     }
 
     setTimeout(() => document.body.classList.add('loaded'), 50);
@@ -349,9 +792,36 @@
     toggle.addEventListener('change', () => {
       document.documentElement.classList.toggle('dark-mode', toggle.checked);
       localStorage.setItem('darkModeEnabled', String(toggle.checked));
+      try { localStorage.setItem('darkModeEnabled', String(toggle.checked)); } catch {}
     });
   }
 
+  /* ── TAB BEHAVIOR ── */
+  function initTabBehavior() {
+    const saved = localStorage.getItem('openInNewTab');
+    openInNewTab = saved !== 'false';
+
+    const tabChoice = document.getElementById('tabChoice');
+    const options = tabChoice.querySelectorAll('.tab-option');
+
+    function updateActive(isNew) {
+      options.forEach(o => o.classList.remove('active'));
+      tabChoice.querySelector(`[data-value="${isNew ? 'new' : 'same'}"]`).classList.add('active');
+      openInNewTab = isNew;
+    }
+
+    updateActive(openInNewTab);
+
+    options.forEach(opt => {
+      opt.addEventListener('click', () => {
+        const isNew = opt.dataset.value === 'new';
+        localStorage.setItem('openInNewTab', String(isNew));
+        updateActive(isNew);
+      });
+    });
+  }
+
+  /* ── SERVICE PREFERENCE ── */
   function initService() {
     const saved = localStorage.getItem('pageRewindService');
     if (saved === 'wayback') document.getElementById('waybackRadio').checked = true;
@@ -360,6 +830,7 @@
     });
   }
 
+  /* ── URL FROM SHARE ── */
   function getSharedUrl() {
     const p = new URLSearchParams(window.location.search);
     const raw = p.get('url') || p.get('text') || p.get('title') || '';
@@ -369,8 +840,10 @@
     return m ? m[0] : '';
   }
 
+  /* ── INIT ── */
   function init() {
     initDarkMode();
+    initTabBehavior();
     initService();
 
     const url = getSharedUrl();
@@ -384,6 +857,7 @@
     }
   }
 
+  /* ── OPEN ARCHIVE ── */
   async function openArchive() {
     if (!currentUrl) return;
 
@@ -410,7 +884,13 @@
         return;
       }
 
-      window.location.href = archiveUrl;
+      if (openInNewTab) {
+        window.open(archiveUrl, '_blank');
+      } else {
+        window.location.href = archiveUrl;
+      }
+
+      showToast('Opening archived version…', 'success');
 
     } catch {
       showStatus('Network error — check your connection and try again.', true);
