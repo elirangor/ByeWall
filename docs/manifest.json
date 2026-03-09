@@ -1,0 +1,35 @@
+{
+  "name": "Page Rewind",
+  "short_name": "Page Rewind",
+  "description": "Open archived versions of web pages via Archive.today or the Wayback Machine.",
+  "start_url": "/ByeWall/",
+  "display": "standalone",
+  "background_color": "#0f0f14",
+  "theme_color": "#0f0f14",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/ByeWall/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/ByeWall/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "/ByeWall/",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "categories": ["utilities", "productivity"]
+}
